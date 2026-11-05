@@ -140,37 +140,150 @@ class AdminController extends Controller
 
     public function daftarPengguna(Request $request)
     {
-        $tab = $request->tab ?? 'belum_aktif';
-        $query = Pengguna::where('peran', 'warga');
+        $peran = $request->peran ?? 'warga';
+        $tab = $request->tab ?? ($peran === 'admin' ? 'semua' : 'belum_aktif');
 
-        if ($tab === 'belum_aktif') {
+        $query = Pengguna::query();
+
+        if ($peran !== 'semua') {
+            $query->where('peran', $peran);
+        }
+
+        if ($tab === 'belum_aktif' || $tab === 'nonaktif') {
             $query->where('aktif', false);
         } elseif ($tab === 'aktif') {
             $query->where('aktif', true);
         }
 
-        if ($request->has('cari') && ! empty($request->cari)) {
+        if ($request->filled('cari')) {
             $c = $request->cari;
             $query->where(function ($q) use ($c) {
                 $q->where('nama', 'like', "%{$c}%")
-                  ->orWhere('username', 'like', "%{$c}%");
+                  ->orWhere('username', 'like', "%{$c}%")
+                  ->orWhere('no_hp', 'like', "%{$c}%")
+                  ->orWhere('no_rumah', 'like', "%{$c}%");
             });
         }
 
-        $allWarga = Pengguna::where('peran', 'warga')->get();
+        $allPeran = Pengguna::when($peran !== 'semua', fn ($q) => $q->where('peran', $peran))->get();
 
         return response()->json([
             'data' => $query->orderBy('dibuat_pada', 'desc')->get(),
             'counts' => [
-                'belum_aktif' => $allWarga->where('aktif', false)->count(),
-                'aktif' => $allWarga->where('aktif', true)->count(),
-                'semua' => $allWarga->count(),
+                'belum_aktif' => $allPeran->where('aktif', false)->count(),
+                'aktif' => $allPeran->where('aktif', true)->count(),
+                'semua' => $allPeran->count(),
             ],
+        ]);
+    }
+
+    public function storePengguna(Request $request)
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:pengguna,username',
+            'password' => 'required|string|min:5',
+            'peran' => 'required|in:warga,admin',
+            'rt' => 'nullable|string|max:3',
+            'no_rumah' => 'nullable|string|max:10',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'username.unique' => 'Username sudah digunakan akun lain.',
+            'password.min' => 'Kata sandi minimal 5 karakter.',
+            'peran.in' => 'Peran pengguna harus warga atau admin.',
+        ]);
+
+        $user = Pengguna::create([
+            'nama' => trim($validated['nama']),
+            'username' => trim($validated['username']),
+            'password' => $validated['password'],
+            'peran' => $validated['peran'],
+            'aktif' => true,
+            'rt' => $validated['rt'] ?? null,
+            'no_rumah' => $validated['no_rumah'] ?? null,
+            'no_hp' => $validated['no_hp'] ?? null,
+            'dibuat_pada' => now(),
+        ]);
+
+        $peranLabel = $user->peran === 'admin' ? 'Pengurus RW' : 'Warga';
+
+        return response()->json([
+            'message' => "Akun {$peranLabel} berhasil dibuat dan langsung aktif.",
+            'data' => $user,
+        ], 201);
+    }
+
+    public function updatePengguna(Request $request, $id)
+    {
+        $currentAdmin = $request->user();
+        $user = Pengguna::find($id);
+
+        if (! $user) {
+            return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
+        }
+
+        $validated = $request->validate([
+            'nama' => 'required|string|max:100',
+            'username' => 'required|string|max:50|unique:pengguna,username,' . $user->id_pengguna . ',id_pengguna',
+            'peran' => 'required|in:warga,admin',
+            'rt' => 'nullable|string|max:3',
+            'no_rumah' => 'nullable|string|max:10',
+            'no_hp' => 'nullable|string|max:20',
+        ], [
+            'username.unique' => 'Username sudah digunakan akun lain.',
+            'peran.in' => 'Peran pengguna harus warga atau admin.',
+        ]);
+
+        $newPeran = $validated['peran'];
+        $newUsername = trim($validated['username']);
+
+        // Guardrails jika menurunkan status pengurus (admin) menjadi warga
+        if ($user->peran === 'admin' && $newPeran === 'warga') {
+            if ($user->id_pengguna === $currentAdmin->id_pengguna) {
+                return response()->json([
+                    'message' => 'Anda tidak dapat menurunkan peran akun Anda sendiri menjadi warga.',
+                ], 422);
+            }
+
+            $activeAdminCount = Pengguna::where('peran', 'admin')->where('aktif', true)->count();
+            if ($activeAdminCount <= 1) {
+                return response()->json([
+                    'message' => 'Tidak dapat mengubah peran. Minimal harus ada satu akun pengurus RW yang berstatus aktif.',
+                ], 422);
+            }
+        }
+
+        // Cek apakah username atau peran berubah
+        $credentialsOrRoleChanged = ($user->username !== $newUsername) || ($user->peran !== $newPeran);
+
+        $user->nama = trim($validated['nama']);
+        $user->username = $newUsername;
+        $user->peran = $newPeran;
+        $user->no_hp = ! empty($validated['no_hp']) ? trim($validated['no_hp']) : null;
+
+        if ($newPeran === 'warga') {
+            $user->rt = $validated['rt'] ?? null;
+            $user->no_rumah = ! empty($validated['no_rumah']) ? trim($validated['no_rumah']) : null;
+        }
+
+        $user->save();
+
+        // Cabut token aktif jika username atau peran diubah agar pengguna login ulang
+        if ($credentialsOrRoleChanged) {
+            $user->tokens()->delete();
+        }
+
+        $peranLabel = $user->peran === 'admin' ? 'Pengurus RW' : 'Warga';
+
+        return response()->json([
+            'message' => "Data akun {$peranLabel} ({$user->username}) berhasil diperbarui.",
+            'data' => $user,
         ]);
     }
 
     public function toggleAktifPengguna(Request $request, $id)
     {
+        $currentAdmin = $request->user();
         $user = Pengguna::find($id);
 
         if (! $user) {
@@ -181,7 +294,24 @@ class AdminController extends Controller
             'aktif' => 'required|boolean',
         ]);
 
-        $user->aktif = $request->aktif;
+        $newAktif = (bool) $request->aktif;
+
+        if ($user->peran === 'admin' && ! $newAktif) {
+            if ($user->id_pengguna === $currentAdmin->id_pengguna) {
+                return response()->json([
+                    'message' => 'Anda tidak dapat menonaktifkan akun Anda sendiri yang sedang digunakan.',
+                ], 422);
+            }
+
+            $activeAdminCount = Pengguna::where('peran', 'admin')->where('aktif', true)->count();
+            if ($activeAdminCount <= 1) {
+                return response()->json([
+                    'message' => 'Tidak dapat menonaktifkan. Minimal harus ada satu akun pengurus RW yang berstatus aktif.',
+                ], 422);
+            }
+        }
+
+        $user->aktif = $newAktif;
         $user->save();
 
         // Revoke active Sanctum tokens immediately when an account is deactivated.
@@ -189,8 +319,39 @@ class AdminController extends Controller
             $user->tokens()->delete();
         }
 
+        $peranLabel = $user->peran === 'admin' ? 'pengurus RW' : 'warga';
+
         return response()->json([
-            'message' => 'Status akun warga berhasil diperbarui.',
+            'message' => "Status akun {$peranLabel} berhasil diperbarui.",
+            'data' => $user,
+        ]);
+    }
+
+    public function resetPasswordPengguna(Request $request, $id)
+    {
+        $user = Pengguna::find($id);
+
+        if (! $user) {
+            return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
+        }
+
+        $request->validate([
+            'password' => 'required|string|min:5',
+        ], [
+            'password.min' => 'Kata sandi baru minimal 5 karakter.',
+        ]);
+
+        $user->password = $request->password;
+        $user->save();
+
+        if (! $user->aktif) {
+            $user->tokens()->delete();
+        }
+
+        $peranLabel = $user->peran === 'admin' ? 'pengurus RW' : 'warga';
+
+        return response()->json([
+            'message' => "Kata sandi akun {$peranLabel} ({$user->username}) berhasil diubah.",
             'data' => $user,
         ]);
     }

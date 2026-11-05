@@ -30,7 +30,10 @@ Route::middleware(['auth:sanctum', 'active_user'])->group(function () {
         Route::post('/aduan/{id}/tanggapan', [AdminController::class, 'kirimTanggapan']);
 
         Route::get('/pengguna', [AdminController::class, 'daftarPengguna']);
+        Route::post('/pengguna', [AdminController::class, 'storePengguna']);
+        Route::put('/pengguna/{id}', [AdminController::class, 'updatePengguna']);
         Route::patch('/pengguna/{id}/aktif', [AdminController::class, 'toggleAktifPengguna']);
+        Route::post('/pengguna/{id}/reset-password', [AdminController::class, 'resetPasswordPengguna']);
 
         Route::get('/kategori', [AdminController::class, 'indexKategori']);
         Route::post('/kategori', [AdminController::class, 'storeKategori']);

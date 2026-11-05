@@ -515,7 +515,7 @@ export const handlers = [
     return HttpResponse.json({ message: 'Tanggapan berhasil dikirim.', data: newTanggapan });
   }),
 
-  // --- ADMIN: VERIFIKASI AKUN WARGA ---
+  // --- ADMIN: KELOLA PENGGUNA (WARGA & PENGURUS RW) ---
   http.get('/api/admin/pengguna', async ({ request }) => {
     const session = db.getSession();
     if (!session || session.peran !== 'admin') {
@@ -523,30 +523,161 @@ export const handlers = [
     }
 
     const url = new URL(request.url);
-    const tab = url.searchParams.get('tab') || 'belum_aktif';
+    const peran = url.searchParams.get('peran') || 'warga';
+    const tab = url.searchParams.get('tab') || (peran === 'admin' ? 'semua' : 'belum_aktif');
     const cari = url.searchParams.get('cari')?.toLowerCase();
 
-    let users = db.getPengguna().filter((u) => u.peran === 'warga');
+    let all = db.getPengguna();
+    if (peran !== 'semua') {
+      all = all.filter((u) => u.peran === peran);
+    }
 
-    if (tab === 'belum_aktif') {
-      users = users.filter((u) => !u.aktif);
+    let filtered = [...all];
+    if (tab === 'belum_aktif' || tab === 'nonaktif') {
+      filtered = filtered.filter((u) => !u.aktif);
     } else if (tab === 'aktif') {
-      users = users.filter((u) => u.aktif);
+      filtered = filtered.filter((u) => u.aktif);
     }
 
     if (cari) {
-      users = users.filter(
-        (u) => u.nama.toLowerCase().includes(cari) || u.username.toLowerCase().includes(cari)
+      filtered = filtered.filter(
+        (u) =>
+          u.nama.toLowerCase().includes(cari) ||
+          u.username.toLowerCase().includes(cari) ||
+          (u.no_hp && u.no_hp.toLowerCase().includes(cari)) ||
+          (u.no_rumah && u.no_rumah.toLowerCase().includes(cari))
       );
     }
 
     return HttpResponse.json({
-      data: users,
+      data: filtered,
       counts: {
-        belum_aktif: db.getPengguna().filter((u) => u.peran === 'warga' && !u.aktif).length,
-        aktif: db.getPengguna().filter((u) => u.peran === 'warga' && u.aktif).length,
-        semua: db.getPengguna().filter((u) => u.peran === 'warga').length,
+        belum_aktif: all.filter((u) => !u.aktif).length,
+        aktif: all.filter((u) => u.aktif).length,
+        semua: all.length,
       },
+    });
+  }),
+
+  http.post('/api/admin/pengguna', async ({ request }) => {
+    const session = db.getSession();
+    if (!session || session.peran !== 'admin') {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = (await request.json()) as {
+      nama?: string;
+      username?: string;
+      password?: string;
+      peran?: 'warga' | 'admin';
+      rt?: string;
+      no_rumah?: string;
+      no_hp?: string;
+    };
+
+    if (!body.nama || !body.username || !body.password || !body.peran) {
+      return HttpResponse.json({ message: 'Nama, username, password, dan peran wajib diisi.' }, { status: 422 });
+    }
+
+    if (body.password.length < 5) {
+      return HttpResponse.json({ message: 'Kata sandi minimal 5 karakter.' }, { status: 422 });
+    }
+
+    const users = db.getPengguna();
+    if (users.some((u) => u.username.toLowerCase() === body.username?.trim().toLowerCase())) {
+      return HttpResponse.json({ message: 'Username sudah digunakan akun lain.' }, { status: 422 });
+    }
+
+    const nextId = users.length > 0 ? Math.max(...users.map((u) => u.id_pengguna)) + 1 : 1;
+    const newUser: Pengguna = {
+      id_pengguna: nextId,
+      nama: body.nama.trim(),
+      username: body.username.trim(),
+      peran: body.peran,
+      aktif: true,
+      rt: body.rt?.trim() || null,
+      no_rumah: body.no_rumah?.trim() || null,
+      no_hp: body.no_hp?.trim() || null,
+      dibuat_pada: new Date().toISOString(),
+    };
+
+    users.unshift(newUser);
+    db.savePengguna(users);
+
+    const peranLabel = newUser.peran === 'admin' ? 'Pengurus RW' : 'Warga';
+    return HttpResponse.json(
+      {
+        message: `Akun ${peranLabel} berhasil dibuat dan langsung aktif.`,
+        data: newUser,
+      },
+      { status: 201 }
+    );
+  }),
+
+  http.put('/api/admin/pengguna/:id', async ({ params, request }) => {
+    const session = db.getSession();
+    if (!session || session.peran !== 'admin') {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const id = Number(params.id);
+    const body = (await request.json()) as {
+      nama?: string;
+      username?: string;
+      peran?: 'warga' | 'admin';
+      rt?: string;
+      no_rumah?: string;
+      no_hp?: string;
+    };
+
+    const users = db.getPengguna();
+    const target = users.find((u) => u.id_pengguna === id);
+
+    if (!target) return HttpResponse.json({ message: 'Pengguna tidak ditemukan.' }, { status: 404 });
+
+    if (!body.nama?.trim() || !body.username?.trim() || !body.peran) {
+      return HttpResponse.json({ message: 'Nama, username, dan peran wajib diisi.' }, { status: 422 });
+    }
+
+    const newUsername = body.username.trim().toLowerCase();
+    const newPeran = body.peran;
+
+    if (users.some((u) => u.id_pengguna !== id && u.username.toLowerCase() === newUsername)) {
+      return HttpResponse.json({ message: 'Username sudah digunakan akun lain.' }, { status: 422 });
+    }
+
+    if (target.peran === 'admin' && newPeran === 'warga') {
+      if (target.id_pengguna === session.id_pengguna) {
+        return HttpResponse.json(
+          { message: 'Anda tidak dapat menurunkan peran akun Anda sendiri menjadi warga.' },
+          { status: 422 }
+        );
+      }
+      const activeAdminCount = users.filter((u) => u.peran === 'admin' && u.aktif).length;
+      if (activeAdminCount <= 1) {
+        return HttpResponse.json(
+          { message: 'Tidak dapat mengubah peran. Minimal harus ada satu akun pengurus RW yang berstatus aktif.' },
+          { status: 422 }
+        );
+      }
+    }
+
+    target.nama = body.nama.trim();
+    target.username = newUsername;
+    target.peran = newPeran;
+    target.no_hp = body.no_hp?.trim() || null;
+
+    if (newPeran === 'warga') {
+      target.rt = body.rt?.trim() || null;
+      target.no_rumah = body.no_rumah?.trim() || null;
+    }
+
+    db.savePengguna(users);
+
+    const peranLabel = target.peran === 'admin' ? 'Pengurus RW' : 'Warga';
+    return HttpResponse.json({
+      message: `Data akun ${peranLabel} (${target.username}) berhasil diperbarui.`,
+      data: target,
     });
   }),
 
@@ -563,11 +694,51 @@ export const handlers = [
 
     if (!target) return HttpResponse.json({ message: 'Pengguna tidak ditemukan.' }, { status: 404 });
 
+    if (target.peran === 'admin' && !body.aktif) {
+      if (target.id_pengguna === session.id_pengguna) {
+        return HttpResponse.json(
+          { message: 'Anda tidak dapat menonaktifkan akun Anda sendiri yang sedang digunakan.' },
+          { status: 422 }
+        );
+      }
+      const activeAdminCount = users.filter((u) => u.peran === 'admin' && u.aktif).length;
+      if (activeAdminCount <= 1) {
+        return HttpResponse.json(
+          { message: 'Tidak dapat menonaktifkan. Minimal harus ada satu akun pengurus RW yang berstatus aktif.' },
+          { status: 422 }
+        );
+      }
+    }
+
     target.aktif = body.aktif;
     db.savePengguna(users);
 
+    const peranLabel = target.peran === 'admin' ? 'pengurus RW' : 'warga';
     return HttpResponse.json({
-      message: `Akun warga berhasil ${body.aktif ? 'diaktifkan' : 'dinonaktifkan'}.`,
+      message: `Status akun ${peranLabel} berhasil diperbarui.`,
+      data: target,
+    });
+  }),
+
+  http.post('/api/admin/pengguna/:id/reset-password', async ({ params, request }) => {
+    const session = db.getSession();
+    if (!session || session.peran !== 'admin') {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const id = Number(params.id);
+    const body = (await request.json()) as { password?: string };
+    if (!body.password || body.password.length < 5) {
+      return HttpResponse.json({ message: 'Kata sandi baru minimal 5 karakter.' }, { status: 422 });
+    }
+
+    const users = db.getPengguna();
+    const target = users.find((u) => u.id_pengguna === id);
+    if (!target) return HttpResponse.json({ message: 'Pengguna tidak ditemukan.' }, { status: 404 });
+
+    const peranLabel = target.peran === 'admin' ? 'pengurus RW' : 'warga';
+    return HttpResponse.json({
+      message: `Kata sandi akun ${peranLabel} (${target.username}) berhasil diubah.`,
       data: target,
     });
   }),

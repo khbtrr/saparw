@@ -43,7 +43,8 @@ export const App: React.FC = () => {
           <Route index element={<Navigate to="/admin/aduan" replace />} />
           <Route path="aduan" element={<AdminDaftarAduan />} />
           <Route path="aduan/:id" element={<AdminDetailAduan />} />
-          <Route path="akun" element={<AdminVerifikasiAkun />} />
+          <Route path="akun" element={<Navigate to="/admin/pengguna" replace />} />
+          <Route path="pengguna" element={<AdminVerifikasiAkun />} />
           <Route path="kategori" element={<AdminKelolaKategori />} />
           <Route path="rekap" element={<AdminRekap />} />
         </Route>

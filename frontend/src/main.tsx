@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { DialogProvider } from './context/DialogContext';
 import App from './App';
 import './index.css';
 
@@ -32,9 +33,11 @@ prepareApp().then(() => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <DialogProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </DialogProvider>
         </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>

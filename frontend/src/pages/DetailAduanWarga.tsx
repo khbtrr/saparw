@@ -15,11 +15,13 @@ import { apiFetch } from '../lib/api';
 import type { Pengaduan } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { formatTanggal } from '../lib/utils';
+import { useDialog } from '../context/DialogContext';
 
 export const DetailAduanWarga: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showAlert, showConfirm } = useDialog();
 
   const { data, isLoading, error } = useQuery<{ data: Pengaduan }>({
     queryKey: ['aduan-detail', id],
@@ -30,11 +32,19 @@ export const DetailAduanWarga: React.FC = () => {
     mutationFn: () => apiFetch(`/api/aduan/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aduan-saya'] });
-      alert('Pengaduan berhasil dibatalkan.');
-      navigate('/warga/aduan');
+      showAlert({
+        title: 'Pengaduan Dibatalkan',
+        message: 'Pengaduan Anda telah berhasil dibatalkan dan dihapus.',
+        type: 'success',
+        onClose: () => navigate('/warga/aduan'),
+      });
     },
     onError: (err: any) => {
-      alert(err.message || 'Gagal membatalkan pengaduan.');
+      showAlert({
+        title: 'Gagal Membatalkan',
+        message: err.message || 'Gagal membatalkan pengaduan.',
+        type: 'danger',
+      });
     },
   });
 
@@ -137,9 +147,13 @@ export const DetailAduanWarga: React.FC = () => {
           <div className="pt-2 border-t border-slate-100 flex justify-end">
             <button
               onClick={() => {
-                if (confirm('Yakin ingin membatalkan dan menghapus pengaduan ini?')) {
-                  deleteMutation.mutate();
-                }
+                showConfirm({
+                  title: 'Batalkan Pengaduan',
+                  message: 'Apakah Anda yakin ingin membatalkan dan menghapus pengaduan ini secara permanen?',
+                  confirmText: 'Ya, Batalkan',
+                  type: 'danger',
+                  onConfirm: () => deleteMutation.mutate(),
+                });
               }}
               disabled={deleteMutation.isPending}
               className="min-h-[44px] text-xs font-semibold text-rose-600 hover:text-rose-800 px-3 py-2 rounded-lg hover:bg-rose-50 flex items-center gap-1.5 transition"

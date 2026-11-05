@@ -17,10 +17,14 @@ Sistem informasi berbasis web untuk pengelolaan pengaduan fasilitas lingkungan w
 
 ### 1. Menjalankan Backend (Laravel API)
 
-1. Pastikan layanan MySQL di XAMPP Control Panel aktif pada port default (`localhost:3306`).
-2. Masuk ke folder `backend` lalu jalankan server artisan:
+1. Pastikan layanan MySQL di XAMPP Control Panel aktif pada port default (`localhost:3306`) dan database `saparw_db` telah tersedia.
+2. Masuk ke folder `backend` lalu jalankan migrasi database (jika belum atau ada pembaruan tabel):
    ```powershell
    cd d:\kuproy\SapaRW\backend
+   php artisan migrate
+   ```
+3. Jalankan server artisan:
+   ```powershell
    php artisan serve --port=8000
    ```
    Layanan API aktif di `http://127.0.0.1:8000/api`.

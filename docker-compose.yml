@@ -1,0 +1,63 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: saparw-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: saparw_db
+      MYSQL_USER: saparw_user
+      MYSQL_PASSWORD: saparw_secret
+      MYSQL_ROOT_PASSWORD: saparw_root_secret
+      TZ: Asia/Jakarta
+    volumes:
+      - saparw_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "saparw_user", "-psaparw_secret"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: saparw-05:latest
+    container_name: saparw-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: "SapaRW 05"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_TIMEZONE: Asia/Jakarta
+      APP_URL: http://localhost:8080
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: saparw_db
+      DB_USERNAME: saparw_user
+      DB_PASSWORD: saparw_secret
+      FILESYSTEM_DISK: public
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    volumes:
+      - saparw_storage_public:/var/www/saparw/backend/storage/app/public
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: saparw-tunnel
+    restart: unless-stopped
+    profiles:
+      - tunnel
+    depends_on:
+      - app
+    command: tunnel --no-autoupdate --url http://app:80
+
+volumes:
+  saparw_mysql_data:
+  saparw_storage_public:

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   FileText,
-  UserCheck,
+  Users,
   Tags,
   BarChart3,
   LogOut,
@@ -24,7 +24,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { label: 'Daftar Aduan', path: '/admin/aduan', icon: FileText },
-    { label: 'Verifikasi Akun', path: '/admin/akun', icon: UserCheck },
+    { label: 'Kelola Pengguna', path: '/admin/pengguna', icon: Users },
     { label: 'Kelola Kategori', path: '/admin/kategori', icon: Tags },
     { label: 'Rekap & Laporan', path: '/admin/rekap', icon: BarChart3 },
   ];

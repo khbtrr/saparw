@@ -143,7 +143,47 @@ cd d:\kuproy\SapaRW
 
 ---
 
-## 7. Daftar Periksa Pasca-Deploy (Smoke Test)
+## 7. Alternatif: Bundling & Deployment Menggunakan Docker Image
+
+Proyek ini telah dilengkapi konfigurasi **Multi-Stage [`Dockerfile`](../Dockerfile)** dan **[`docker-compose.yml`](../docker-compose.yml)** yang mengemas Frontend React, Backend Laravel, Nginx, dan MySQL 8.0 ke dalam container siap jalan.
+
+### 1. Menjalankan Seluruh Sistem dengan Docker Compose
+Pastikan **Docker Desktop** (Windows/Mac) atau **Docker Engine** (Linux) sudah menyala, lalu jalankan:
+
+```bash
+docker compose up -d --build
+```
+
+Container `saparw-app` akan otomatis:
+- Menunggu container MySQL (`saparw-mysql`) siap,
+- Membuat `APP_KEY` dan symlink `storage:link`,
+- Menjalankan migrasi tabel (`php artisan migrate --force`),
+- Mengisi data awal `DatabaseSeeder` jika tabel masih kosong,
+- Melayani aplikasi penuh di **`http://localhost:8080`**.
+
+### 2. Menjalankan Docker Sekaligus Cloudflare Tunnel
+Jika ingin langsung mengekspos container Docker ke internet publik tanpa menginstal `cloudflared` di komputer host:
+
+```bash
+docker compose --profile tunnel up -d --build
+docker logs -f saparw-tunnel
+```
+Salin URL `https://xxxx.trycloudflare.com` yang tampil pada log `saparw-tunnel`.
+
+### 3. Mem-build & Menyimpan Docker Image Mandiri
+Jika Anda hanya ingin mem-build Docker Image untuk di-*push* ke registry (Docker Hub / GHCR) atau diekspor menjadi file `.tar`:
+
+```bash
+# Build image
+docker build -t saparw-05:latest .
+
+# Opsional: Ekspor image ke file .tar untuk dipindahkan ke server lain
+docker save -o saparw-05-image.tar saparw-05:latest
+```
+
+---
+
+## 8. Daftar Periksa Pasca-Deploy (Smoke Test)
 
 1. Buka halaman utama `/` dan pastikan angka pada bagian **Statistik Penanganan Aduan RW 05** serta **Aduan Warga yang Telah Selesai** tampil dari MySQL tanpa error di Console.
 2. Pastikan `/mockServiceWorker.js` tidak aktif di tab Network / Application DevTools.
