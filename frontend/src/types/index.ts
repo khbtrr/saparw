@@ -62,8 +62,6 @@ export interface Pengaduan {
   diajukan_pada: string;
   diperbarui_pada: string;
   dilihat_pelapor_pada?: string | null;
-  
-  // Relations / joined properties
   kategori?: KategoriFasilitas;
   pelapor?: Pengguna;
   lampiran_foto?: LampiranFoto[];

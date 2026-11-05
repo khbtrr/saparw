@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // 1. Tabel pengguna
         Schema::create('pengguna', function (Blueprint $table) {
             $table->id('id_pengguna');
             $table->string('nama', 100);
@@ -25,7 +21,6 @@ return new class extends Migration
             $table->timestamp('dibuat_pada')->useCurrent();
         });
 
-        // 2. Tabel kategori_fasilitas
         Schema::create('kategori_fasilitas', function (Blueprint $table) {
             $table->id('id_kategori');
             $table->string('nama_kategori', 100)->unique();
@@ -33,7 +28,6 @@ return new class extends Migration
             $table->boolean('aktif')->default(true);
         });
 
-        // 3. Tabel pengaduan
         Schema::create('pengaduan', function (Blueprint $table) {
             $table->id('id_pengaduan');
             $table->string('nomor_pengaduan', 30)->unique();
@@ -52,7 +46,6 @@ return new class extends Migration
             $table->foreign('id_kategori')->references('id_kategori')->on('kategori_fasilitas')->onDelete('restrict');
         });
 
-        // 4. Tabel lampiran_foto
         Schema::create('lampiran_foto', function (Blueprint $table) {
             $table->id('id_lampiran');
             $table->unsignedBigInteger('id_pengaduan');
@@ -63,7 +56,6 @@ return new class extends Migration
             $table->foreign('id_pengaduan')->references('id_pengaduan')->on('pengaduan')->onDelete('cascade');
         });
 
-        // 5. Tabel tanggapan
         Schema::create('tanggapan', function (Blueprint $table) {
             $table->id('id_tanggapan');
             $table->unsignedBigInteger('id_pengaduan');
@@ -75,7 +67,6 @@ return new class extends Migration
             $table->foreign('id_pengurus')->references('id_pengguna')->on('pengguna')->onDelete('cascade');
         });
 
-        // 6. Tabel riwayat_status
         Schema::create('riwayat_status', function (Blueprint $table) {
             $table->id('id_riwayat');
             $table->unsignedBigInteger('id_pengaduan');
@@ -90,9 +81,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('riwayat_status');

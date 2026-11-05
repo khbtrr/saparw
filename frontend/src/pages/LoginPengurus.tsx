@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, ApiError } from '../lib/api';
 import type { Pengguna } from '../types';
@@ -46,100 +46,106 @@ export const LoginPengurus: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
-          <span className="text-[11px] text-slate-400 font-mono ml-2">pengaduan-rw05 / admin / login</span>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-elev-2 border border-slate-200 overflow-hidden p-6 sm:p-8">
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-2 text-emerald-800 font-bold text-xs mb-1.5">
+            <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
+            <span>Pengurus RW 05 Desa Karangraharja</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Masuk Panel Pengurus RW</h1>
+          <p className="text-xs text-slate-600 mt-1">
+            Khusus pengurus RW 05 untuk verifikasi akun warga dan tindak lanjut aduan.
+          </p>
         </div>
 
-        <div className="p-8">
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-2 text-emerald-800 font-bold text-sm mb-1">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <span>RW 05 DESA KARANGRAHARJA</span>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900">Login Pengurus RW</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Khusus pengurus RW 05 untuk verifikasi dan tindak lanjut aduan.</p>
+        {errorMessage && (
+          <div
+            role="alert"
+            className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="admin-username" className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Username Pengurus
+            </label>
+            <input
+              id="admin-username"
+              type="text"
+              required
+              placeholder="Masukkan username pengurus"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full min-h-[44px] px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+            />
           </div>
 
-          {errorMessage && (
-            <div className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Username
-              </label>
+          <div>
+            <label htmlFor="admin-password" className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Kata Sandi
+            </label>
+            <div className="relative">
               <input
-                type="text"
+                id="admin-password"
+                type={showPassword ? 'text' : 'password'}
                 required
-                placeholder="Masukkan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition"
+                placeholder="Masukkan kata sandi"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full min-h-[44px] pl-3.5 pr-12 py-2.5 text-sm rounded-lg border border-slate-300 text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="Masukkan password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3.5 pr-10 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-2 py-2.5 px-4 rounded-lg font-bold text-sm text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] transition shadow flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Masuk</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <Link to="/masuk" className="hover:text-emerald-700">
-              Kembali ke Login Warga
-            </Link>
-            <span className="text-[11px] text-slate-400">Versi 1.0</span>
           </div>
 
-          {showDemoHint && (
-            <div className="mt-4 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600">
-              <p className="font-bold text-slate-700">Akun Demo Pengurus:</p>
-              <p>Username: <code className="bg-slate-200 px-1 rounded">admin</code> | Pass: <code className="bg-slate-200 px-1 rounded">admin123</code></p>
-            </div>
-          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full min-h-[44px] mt-2 py-2.5 px-4 rounded-lg font-bold text-sm text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-elev-1 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Memeriksa...</span>
+              </>
+            ) : (
+              <span>Masuk ke Panel Pengurus</span>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+          <Link
+            to="/masuk"
+            className="min-h-[44px] inline-flex items-center px-1 hover:text-primary font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded"
+          >
+            Halaman Masuk Warga
+          </Link>
+          <Link
+            to="/"
+            className="min-h-[44px] inline-flex items-center px-1 hover:text-primary font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded"
+          >
+            Beranda Publik
+          </Link>
         </div>
+
+        {showDemoHint && (
+          <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700">
+            <p className="font-bold text-slate-800">Akun Demo Pengurus:</p>
+            <p>Username: <code className="bg-slate-200 px-1 rounded">admin</code> | Kata Sandi: <code className="bg-slate-200 px-1 rounded">admin123</code></p>
+          </div>
+        )}
       </div>
     </div>
   );

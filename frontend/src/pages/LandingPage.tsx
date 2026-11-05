@@ -139,10 +139,9 @@ const Navbar: React.FC = () => {
           {user ? (
             <Link
               to={dashboardHref}
-              className={`min-h-[44px] px-4 py-2.5 rounded-lg font-sans text-sm font-semibold bg-primary hover:bg-primary-dark text-white transition-colors inline-flex items-center gap-2 ${FOCUS_RING}`}
+              className={`min-h-[44px] px-4 py-2.5 rounded-lg font-sans text-sm font-semibold bg-primary hover:bg-primary-dark text-white transition-colors inline-flex items-center ${FOCUS_RING}`}
             >
               <span>Ke Dasbor ({user.peran === 'admin' ? 'Pengurus' : 'Warga'})</span>
-              <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <>
@@ -198,10 +197,9 @@ const Navbar: React.FC = () => {
               <Link
                 to={dashboardHref}
                 onClick={() => setMenuOpen(false)}
-                className={`min-h-[44px] px-4 py-2.5 rounded-lg font-sans text-sm font-semibold bg-primary hover:bg-primary-dark text-white flex items-center justify-center gap-2 ${FOCUS_RING}`}
+                className={`min-h-[44px] px-4 py-2.5 rounded-lg font-sans text-sm font-semibold bg-primary hover:bg-primary-dark text-white flex items-center justify-center ${FOCUS_RING}`}
               >
                 <span>Ke Dasbor ({user.peran === 'admin' ? 'Pengurus' : 'Warga'})</span>
-                <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
               <>
@@ -347,25 +345,20 @@ const StatistikSection: React.FC = () => {
   return (
     <section id="statistik" className="w-full bg-surface py-10 border-b border-slate-200 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-          <div>
-            <h2 className="font-sans text-xl font-bold text-slate-900">
-              Statistik Penanganan Aduan RW 05
-            </h2>
-            <p className="font-body text-xs text-slate-600 mt-0.5">
-              Rekapitulasi langsung dari basis data pengaduan fasilitas lingkungan
-            </p>
-          </div>
-          <span className="self-start sm:self-auto font-body text-xs font-semibold text-slate-700 bg-canvas border border-slate-200 px-3 py-1 rounded-full">
-            Data Real-Time Sistem
-          </span>
+        <div className="mb-6">
+          <h2 className="font-sans text-xl font-bold text-slate-900">
+            Statistik Penanganan Aduan RW 05
+          </h2>
+          <p className="font-body text-xs text-slate-600 mt-0.5">
+            Rekapitulasi langsung dari basis data pengaduan fasilitas lingkungan
+          </p>
         </div>
 
         {isLoading && (
           <div
             role="status"
             aria-live="polite"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
           >
             {[1, 2, 3, 4, 5].map((n) => (
               <div
@@ -409,7 +402,7 @@ const StatistikSection: React.FC = () => {
         )}
 
         {!isLoading && !isError && stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div className="bg-surface p-4 rounded-2xl border border-slate-200 shadow-elev-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="font-body text-sm font-medium text-slate-700">
@@ -576,10 +569,7 @@ const AlurSection: React.FC = () => {
     <section id="alur" className="w-full py-14 lg:py-16 bg-canvas border-b border-slate-200 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="max-w-2xl mx-auto text-center mb-10">
-          <span className="inline-block font-body text-xs font-semibold text-primary bg-primary-soft px-3 py-1 rounded-full">
-            Tahapan Penanganan Resmi
-          </span>
-          <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em] mt-2">
+          <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em]">
             Alur Penyampaian &amp; Tindak Lanjut
           </h2>
           <p className="font-body text-[15px] leading-6 text-slate-700 mt-2">
@@ -652,10 +642,7 @@ const KategoriSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
           <div>
-            <span className="inline-block font-body text-xs font-semibold text-primary bg-primary-soft px-3 py-1 rounded-full">
-              Cakupan Fasilitas Lingkungan
-            </span>
-            <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em] mt-2">
+            <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em]">
               Kategori Fasilitas yang Dilayani
             </h2>
           </div>
@@ -668,7 +655,7 @@ const KategoriSection: React.FC = () => {
           <div
             role="status"
             aria-live="polite"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
           >
             {[1, 2, 3, 4, 5].map((n) => (
               <div
@@ -725,7 +712,7 @@ const KategoriSection: React.FC = () => {
         )}
 
         {!isLoading && !isError && categories.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {categories.map((kat) => {
               const IconComponent = getKategoriIcon(kat.nama_kategori);
               return (
@@ -767,10 +754,7 @@ const AduanTuntasSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3">
           <div>
-            <span className="inline-block font-body text-xs font-semibold text-primary bg-primary-soft px-3 py-1 rounded-full">
-              Transparansi Tindak Lanjut
-            </span>
-            <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em] mt-2">
+            <h2 className="font-sans text-2xl lg:text-[32px] lg:leading-[40px] font-bold text-slate-900 tracking-[-0.02em]">
               Aduan Warga yang Telah Selesai
             </h2>
           </div>
@@ -783,7 +767,7 @@ const AduanTuntasSection: React.FC = () => {
           <div
             role="status"
             aria-live="polite"
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {[1, 2, 3].map((n) => (
               <div
@@ -839,16 +823,15 @@ const AduanTuntasSection: React.FC = () => {
             </p>
             <Link
               to="/warga/aduan/baru"
-              className={`mt-4 min-h-[44px] px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white font-sans text-sm font-semibold inline-flex items-center gap-2 ${FOCUS_RING}`}
+              className={`mt-4 min-h-[44px] px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white font-sans text-sm font-semibold inline-flex items-center ${FOCUS_RING}`}
             >
               <span>Kirim Aduan Pertama</span>
-              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         )}
 
         {!isLoading && !isError && list.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {list.map((item) => {
               const KategoriIcon = getKategoriIcon(item.nama_kategori);
               return (
@@ -943,9 +926,6 @@ const CtaSection: React.FC = () => {
         <div className="bg-primary rounded-2xl p-6 sm:p-10 lg:p-12 text-white shadow-elev-2">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7">
-              <span className="inline-block bg-status-done-bg text-status-done-text font-body text-xs font-bold px-3 py-1 rounded-full mb-3">
-                Layanan Pengaduan Warga RW 05
-              </span>
               <h2 className="font-sans text-2xl sm:text-3xl lg:text-[32px] lg:leading-[40px] font-extrabold tracking-[-0.02em]">
                 Ada fasilitas rusak di RT Anda? Laporkan sekarang.
               </h2>
@@ -956,10 +936,9 @@ const CtaSection: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3 mt-6">
                 <Link
                   to="/warga/aduan/baru"
-                  className="min-h-[48px] bg-surface text-primary hover:bg-primary-soft font-sans text-base font-bold px-6 py-3 rounded-lg transition-colors shadow-elev-1 inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="min-h-[48px] bg-surface text-primary hover:bg-primary-soft font-sans text-base font-bold px-6 py-3 rounded-lg transition-colors shadow-elev-1 inline-flex items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   <span>Buat Pengaduan Baru</span>
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -986,10 +965,9 @@ const CtaSection: React.FC = () => {
               <div className="mt-5 flex flex-col gap-2.5">
                 <Link
                   to="/warga/aduan"
-                  className={`w-full min-h-[44px] bg-primary hover:bg-primary-dark text-white font-sans text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors inline-flex items-center justify-center gap-2 ${FOCUS_RING}`}
+                  className={`w-full min-h-[44px] bg-primary hover:bg-primary-dark text-white font-sans text-sm font-semibold py-2.5 px-4 rounded-lg transition-colors inline-flex items-center justify-center ${FOCUS_RING}`}
                 >
                   <span>Lihat Daftar Aduan Saya</span>
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/daftar"

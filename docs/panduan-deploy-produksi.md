@@ -102,7 +102,48 @@ sudo certbot --nginx -d saparw05.karangraharja.desa.id
 
 ---
 
-## 6. Daftar Periksa Pasca-Deploy (Smoke Test)
+## 6. Alternatif: Akses Publik dari Komputer Lokal via Cloudflare Tunnel
+
+Jika Anda ingin menjalankan aplikasi langsung dari komputer lokal (menggunakan MySQL XAMPP lokal dan penyimpanan foto lokal) namun dapat diakses publik lewat internet dengan HTTPS gratis:
+
+### Prasyarat
+1. Nyalakan **MySQL** di XAMPP Control Panel.
+2. Instal **Cloudflare Tunnel (`cloudflared`)** di Windows (cukup sekali):
+   ```powershell
+   winget install Cloudflare.cloudflared
+   ```
+
+### Cara Cepat (Otomatis dengan Script)
+Jalankan script [`start-tunnel.ps1`](../start-tunnel.ps1) dari direktori utama proyek:
+
+```powershell
+cd d:\kuproy\SapaRW
+.\start-tunnel.ps1
+```
+*(Gunakan `.\start-tunnel.ps1 -Rebuild` apabila Anda baru saja mengubah kode frontend dan ingin memperbarui bundel produksi).*
+
+### Cara Manual (3 Terminal)
+1. **Terminal 1 (Backend Laravel - Port 8000)**:
+   ```powershell
+   cd d:\kuproy\SapaRW\backend
+   php artisan storage:link
+   php artisan serve --host=127.0.0.1 --port=8000
+   ```
+2. **Terminal 2 (Frontend Produksi - Port 4173)**:
+   ```powershell
+   cd d:\kuproy\SapaRW\frontend
+   npm run build
+   npm run preview -- --host --port 4173
+   ```
+3. **Terminal 3 (Cloudflare Tunnel)**:
+   ```powershell
+   cloudflared tunnel --url http://localhost:4173
+   ```
+   Salin URL `https://xxxx.trycloudflare.com` yang muncul di terminal. Karena `preview.proxy` di [`frontend/vite.config.ts`](../frontend/vite.config.ts) sudah meneruskan `/api` dan `/storage` ke `http://127.0.0.1:8000`, seluruh fitur dan unggahan foto akan langsung berjalan lewat satu URL tersebut.
+
+---
+
+## 7. Daftar Periksa Pasca-Deploy (Smoke Test)
 
 1. Buka halaman utama `/` dan pastikan angka pada bagian **Statistik Penanganan Aduan RW 05** serta **Aduan Warga yang Telah Selesai** tampil dari MySQL tanpa error di Console.
 2. Pastikan `/mockServiceWorker.js` tidak aktif di tab Network / Application DevTools.

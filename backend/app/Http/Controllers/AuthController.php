@@ -28,7 +28,8 @@ class AuthController extends Controller
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'peran' => 'warga',
-            'aktif' => false, // Default belum aktif menunggu verifikasi pengurus
+            // Accounts require manual activation by RW administrators before login.
+            'aktif' => false,
             'rt' => $validated['rt'] ?? null,
             'no_rumah' => $validated['no_rumah'] ?? null,
             'no_hp' => $validated['no_hp'] ?? null,

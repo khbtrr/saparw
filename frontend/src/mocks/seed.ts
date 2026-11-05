@@ -28,7 +28,7 @@ export const INITIAL_PENGGUNA: Pengguna[] = [
     nama: 'Warga 02 (Ahmad Fauzi)',
     username: 'warga02',
     peran: 'warga',
-    aktif: false, // Belum aktif (menunggu verifikasi)
+    aktif: false,
     rt: '03',
     no_rumah: '05',
     no_hp: '081299990002',
@@ -39,7 +39,7 @@ export const INITIAL_PENGGUNA: Pengguna[] = [
     nama: 'Warga 03 (Joko Susilo)',
     username: 'warga03',
     peran: 'warga',
-    aktif: false, // Belum aktif (menunggu verifikasi)
+    aktif: false,
     rt: '04',
     no_rumah: '19',
     no_hp: '081299990003',

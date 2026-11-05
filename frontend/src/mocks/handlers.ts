@@ -3,7 +3,6 @@ import { db } from './storage';
 import type { Pengaduan, Pengguna, KategoriFasilitas, RiwayatStatus, Tanggapan } from '../types';
 
 export const handlers = [
-  // --- AUTH ---
   http.post('/api/auth/login', async ({ request }) => {
     await delay(300);
     const body = (await request.json()) as { username?: string; password?: string; peran_target?: string };
@@ -69,7 +68,8 @@ export const handlers = [
       nama: body.nama.trim(),
       username: body.username.trim(),
       peran: 'warga',
-      aktif: false, // Default belum aktif menunggu verifikasi
+      // Accounts require manual activation by RW administrators before login.
+      aktif: false,
       rt: body.rt?.trim() || null,
       no_rumah: body.no_rumah?.trim() || null,
       no_hp: body.no_hp?.trim() || null,
@@ -145,7 +145,6 @@ export const handlers = [
     return HttpResponse.json({ message: 'Kata sandi berhasil diubah.' });
   }),
 
-  // --- PUBLIK ---
   http.get('/api/publik/statistik', async () => {
     const list = db.getPengaduan();
     const data = {
@@ -190,7 +189,6 @@ export const handlers = [
     return HttpResponse.json({ data: categories });
   }),
 
-  // --- WARGA: ADUAN ---
   http.get('/api/aduan', async ({ request }) => {
     await delay(200);
     const session = db.getSession();
@@ -234,7 +232,6 @@ export const handlers = [
       return HttpResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    // Update dilihat_pelapor_pada jika warga yang melihat
     if (session.peran === 'warga') {
       item.dilihat_pelapor_pada = new Date().toISOString().replace('T', ' ').slice(0, 19);
       db.savePengaduan(list);
@@ -284,14 +281,12 @@ export const handlers = [
     const kategori = db.getKategori().find((k) => k.id_kategori === Number(body.id_kategori));
     const namaKat = kategori?.nama_kategori || 'Fasilitas';
 
-    // Format nomor aduan: ADU-YYYY-NNN
     const year = new Date().getFullYear();
     const seq = list.length + 1;
     const nomor = `ADU-${year}-${String(seq).padStart(3, '0')}`;
 
-    // Otomatis judul: "{kategori} – {40 karakter awal uraian}…"
     const uraianClean = body.isi_pengaduan.trim().replace(/\r?\n/g, ' ');
-    const judul = `${namaKat} – ${uraianClean.slice(0, 40)}${uraianClean.length > 40 ? '…' : ''}`;
+    const judul = `${namaKat}: ${uraianClean.slice(0, 40)}${uraianClean.length > 40 ? '...' : ''}`;
 
     const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
     const newId = Date.now();
@@ -365,7 +360,6 @@ export const handlers = [
     return HttpResponse.json({ message: 'Pengaduan berhasil dibatalkan.' });
   }),
 
-  // --- ADMIN: ADUAN & RINGKASAN ---
   http.get('/api/admin/aduan', async ({ request }) => {
     await delay(250);
     const session = db.getSession();
@@ -416,7 +410,6 @@ export const handlers = [
     });
   }),
 
-  // Admin update status
   http.post('/api/admin/aduan/:id/status', async ({ params, request }) => {
     await delay(300);
     const session = db.getSession();
@@ -479,7 +472,6 @@ export const handlers = [
     return HttpResponse.json({ message: 'Status berhasil diperbarui.', data: item });
   }),
 
-  // Admin kirim tanggapan
   http.post('/api/admin/aduan/:id/tanggapan', async ({ params, request }) => {
     await delay(300);
     const session = db.getSession();
@@ -515,7 +507,6 @@ export const handlers = [
     return HttpResponse.json({ message: 'Tanggapan berhasil dikirim.', data: newTanggapan });
   }),
 
-  // --- ADMIN: VERIFIKASI AKUN WARGA ---
   http.get('/api/admin/pengguna', async ({ request }) => {
     const session = db.getSession();
     if (!session || session.peran !== 'admin') {
@@ -572,7 +563,6 @@ export const handlers = [
     });
   }),
 
-  // --- ADMIN: KELOLA KATEGORI ---
   http.get('/api/admin/kategori', async () => {
     return HttpResponse.json({ data: db.getKategori() });
   }),
@@ -625,7 +615,6 @@ export const handlers = [
     return HttpResponse.json({ message: 'Kategori berhasil diperbarui.', data: item });
   }),
 
-  // --- ADMIN: REKAP ---
   http.get('/api/admin/rekap', async ({ request }) => {
     const url = new URL(request.url);
     const dari = url.searchParams.get('dari');
@@ -649,7 +638,6 @@ export const handlers = [
       list = list.filter((a) => a.status_terkini === statusFilter);
     }
 
-    // Matriks Kategori x Status
     const matrix = categories.map((cat) => {
       const itemsCat = list.filter((a) => a.id_kategori === cat.id_kategori);
       const dj = itemsCat.filter((a) => a.status_terkini === 'Diajukan').length;
