@@ -136,18 +136,21 @@ export const AdminKelolaKategori: React.FC = () => {
                     <td className="py-3 px-4 text-center">
                       <button
                         type="button"
+                        role="switch"
+                        aria-checked={cat.aktif}
+                        aria-label={`Status aktif kategori ${cat.nama_kategori}`}
                         onClick={() =>
                           mutationToggle.mutate({ id: cat.id_kategori, aktif: !cat.aktif })
                         }
                         title={cat.aktif ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}
-                        className="inline-flex items-center text-emerald-600 hover:text-emerald-800 transition"
+                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-emerald-600 hover:text-emerald-800 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 rounded-lg"
                       >
                         {cat.aktif ? (
-                          <div className="w-9 h-5 bg-emerald-600 rounded-full relative cursor-pointer p-0.5">
+                          <div className="w-9 h-5 bg-emerald-600 rounded-full relative p-0.5">
                             <div className="w-4 h-4 bg-white rounded-full ml-auto shadow-sm" />
                           </div>
                         ) : (
-                          <div className="w-9 h-5 bg-slate-300 rounded-full relative cursor-pointer p-0.5">
+                          <div className="w-9 h-5 bg-slate-300 rounded-full relative p-0.5">
                             <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
                           </div>
                         )}
@@ -157,7 +160,7 @@ export const AdminKelolaKategori: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleMulaiUbah(cat)}
-                        className="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-100 rounded-md font-medium text-[11px]"
+                        className="min-h-[36px] px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 rounded-md font-medium text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
                       >
                         Ubah
                       </button>

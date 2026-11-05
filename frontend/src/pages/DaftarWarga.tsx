@@ -47,26 +47,26 @@ export const DaftarWarga: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-elev-2 border border-slate-200 overflow-hidden p-6 sm:p-8">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden p-6 sm:p-8">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary-soft text-primary mb-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 mb-2">
             <UserPlus className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Akun Warga</h1>
-          <p className="text-xs text-slate-600 mt-1">Lengkapi data domisili warga RW 05 Desa Karangraharja</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Akun Warga</h2>
+          <p className="text-xs text-slate-500 mt-1">Lengkapi data kependudukan RW 05 Anda</p>
         </div>
 
         {success ? (
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-3">
-            <CheckCircle2 className="w-10 h-10 text-emerald-700 mx-auto" />
-            <h2 className="font-bold text-sm text-emerald-900">Pendaftaran Berhasil Terkirim</h2>
-            <p className="text-xs text-emerald-800 leading-relaxed">
-              Akun Anda berstatus <strong>Menunggu Verifikasi</strong>. Pengurus RW 05 akan memeriksa dan mengaktifkan akun Anda sebelum dapat digunakan untuk masuk.
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+            <h3 className="font-bold text-sm text-emerald-900">Pendaftaran Berhasil Terkirim!</h3>
+            <p className="text-xs text-emerald-700 leading-relaxed">
+              Akun Anda berstatus <strong>Menunggu Verifikasi</strong>. Pengurus RW akan mengaktifkan akun Anda sebelum dapat digunakan untuk masuk.
             </p>
             <div className="pt-2">
               <Link
                 to="/masuk"
-                className="min-h-[44px] inline-flex items-center justify-center w-full py-2.5 px-4 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-dark transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="inline-block w-full py-2.5 px-4 bg-emerald-700 text-white rounded-xl text-xs font-bold hover:bg-emerald-800 transition"
               >
                 Kembali ke Halaman Masuk
               </Link>
@@ -75,54 +75,42 @@ export const DaftarWarga: React.FC = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {errorMessage && (
-              <div
-                role="alert"
-                className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2"
-              >
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             <div>
-              <label htmlFor="daftar-nama" className="block text-xs font-semibold text-slate-700 mb-1">
-                Nama Lengkap
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap</label>
               <input
-                id="daftar-nama"
                 type="text"
                 required
-                placeholder="Masukkan nama lengkap sesuai KTP"
+                placeholder="Contoh: Siti Aminah"
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
-                className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="daftar-username" className="block text-xs font-semibold text-slate-700 mb-1">
-                  Username
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Username</label>
                 <input
-                  id="daftar-username"
                   type="text"
                   required
-                  placeholder="Buat username"
+                  placeholder="warga05"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
                 />
               </div>
               <div>
-                <label htmlFor="daftar-rt" className="block text-xs font-semibold text-slate-700 mb-1">
-                  RT Domisili
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">RT Domisili</label>
                 <select
-                  id="daftar-rt"
                   value={rt}
                   onChange={(e) => setRt(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
                 >
                   <option value="01">RT 01</option>
                   <option value="02">RT 02</option>
@@ -133,71 +121,56 @@ export const DaftarWarga: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label htmlFor="daftar-norumah" className="block text-xs font-semibold text-slate-700 mb-1">
-                  No. Rumah
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">No. Rumah</label>
                 <input
-                  id="daftar-norumah"
                   type="text"
-                  placeholder="Nomor rumah"
+                  placeholder="Blok C No. 12"
                   value={noRumah}
                   onChange={(e) => setNoRumah(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
                 />
               </div>
               <div>
-                <label htmlFor="daftar-nohp" className="block text-xs font-semibold text-slate-700 mb-1">
-                  No. WhatsApp
-                </label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp</label>
                 <input
-                  id="daftar-nohp"
                   type="tel"
-                  placeholder="Nomor HP aktif"
+                  placeholder="0812xxxx"
                   value={noHp}
                   onChange={(e) => setNoHp(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="daftar-password" className="block text-xs font-semibold text-slate-700 mb-1">
-                Kata Sandi
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
               <input
-                id="daftar-password"
                 type="password"
                 required
                 placeholder="Minimal 5 karakter"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full min-h-[44px] px-3 py-2 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full min-h-[44px] mt-3 py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-primary hover:bg-primary-dark transition-colors shadow-elev-1 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="w-full mt-3 min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-emerald-700 hover:bg-emerald-800 transition shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Mendaftarkan...</span>
-                </>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <span>Kirim Pendaftaran Akun</span>
+                <span>Daftar Akun</span>
               )}
             </button>
 
-            <div className="text-center pt-2">
-              <Link
-                to="/masuk"
-                className="min-h-[44px] inline-flex items-center px-2 text-xs text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded"
-              >
-                Sudah punya akun? <span className="text-primary font-semibold underline ml-1">Masuk</span>
+            <div className="text-center pt-3">
+              <Link to="/masuk" className="text-xs text-slate-500 hover:text-slate-800">
+                Sudah punya akun? <span className="text-emerald-700 font-semibold underline">Masuk</span>
               </Link>
             </div>
           </form>

@@ -46,19 +46,21 @@ export const AdminVerifikasiAkun: React.FC = () => {
           <p className="text-xs text-slate-500">Aktivasi akun warga baru yang mendaftar di sistem</p>
         </div>
         <button
+          type="button"
           onClick={() => refetch()}
-          className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
           title="Segarkan data"
+          aria-label="Segarkan data warga"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Tabs Filter sesuai Wireframe 4: Belum aktif (2) | Aktif (3) | Semua */}
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={() => setTab('belum_aktif')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          className={`min-h-[38px] px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900 ${
             tab === 'belum_aktif'
               ? 'bg-slate-900 text-white shadow'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -71,8 +73,9 @@ export const AdminVerifikasiAkun: React.FC = () => {
         </button>
 
         <button
+          type="button"
           onClick={() => setTab('aktif')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          className={`min-h-[38px] px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900 ${
             tab === 'aktif'
               ? 'bg-slate-900 text-white shadow'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -85,8 +88,9 @@ export const AdminVerifikasiAkun: React.FC = () => {
         </button>
 
         <button
+          type="button"
           onClick={() => setTab('semua')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          className={`min-h-[38px] px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900 ${
             tab === 'semua'
               ? 'bg-slate-900 text-white shadow'
               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -97,7 +101,6 @@ export const AdminVerifikasiAkun: React.FC = () => {
         </button>
       </div>
 
-      {/* Pencarian sesuai Wireframe 4: Cari nama atau username */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -111,7 +114,6 @@ export const AdminVerifikasiAkun: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabel Warga Sesuai Wireframe 4: Nama, Username, Status, Aksi (Aktifkan / Nonaktifkan) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center text-xs text-slate-500">Memuat data akun warga...</div>

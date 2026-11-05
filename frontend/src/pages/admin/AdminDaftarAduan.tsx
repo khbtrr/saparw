@@ -35,91 +35,96 @@ export const AdminDaftarAduan: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Browser Bar Style Mockup Header sesuai wireframe 2: Daftar Aduan */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Daftar Aduan</h2>
           <p className="text-xs text-slate-500">Kelola dan tinjau aduan warga secara terpusat</p>
         </div>
         <button
+          type="button"
           onClick={() => refetch()}
-          className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
           title="Segarkan data"
+          aria-label="Segarkan data pengaduan"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
-      {/* 6 Kotak Kartu Ringkasan Sesuai Wireframe 2 Desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {/* Total */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Semua')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Semua'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900 ${
             status === 'Semua' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
           <div className="text-2xl font-black text-slate-900">{ringkasan.total}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Total Aduan</div>
-        </div>
+        </button>
 
-        {/* Diajukan */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Diajukan')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Diajukan'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 ${
             status === 'Diajukan' ? 'border-amber-500 ring-2 ring-amber-500/10' : 'border-slate-200 hover:border-amber-300'
           }`}
         >
           <div className="text-2xl font-black text-amber-600">{ringkasan.diajukan}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Diajukan</div>
-        </div>
+        </button>
 
-        {/* Diverifikasi */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Diverifikasi')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Diverifikasi'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 ${
             status === 'Diverifikasi' ? 'border-blue-500 ring-2 ring-blue-500/10' : 'border-slate-200 hover:border-blue-300'
           }`}
         >
           <div className="text-2xl font-black text-blue-600">{ringkasan.diverifikasi}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Diverifikasi</div>
-        </div>
+        </button>
 
-        {/* Diproses */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Diproses')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Diproses'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-600 ${
             status === 'Diproses' ? 'border-purple-500 ring-2 ring-purple-500/10' : 'border-slate-200 hover:border-purple-300'
           }`}
         >
           <div className="text-2xl font-black text-purple-600">{ringkasan.diproses}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Diproses</div>
-        </div>
+        </button>
 
-        {/* Selesai */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Selesai')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Selesai'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600 ${
             status === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-500/10' : 'border-slate-200 hover:border-emerald-300'
           }`}
         >
           <div className="text-2xl font-black text-emerald-600">{ringkasan.selesai}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Selesai</div>
-        </div>
+        </button>
 
-        {/* Ditolak */}
-        <div
+        <button
+          type="button"
           onClick={() => setStatus('Ditolak')}
-          className={`bg-white p-3.5 rounded-xl border cursor-pointer transition shadow-sm ${
+          aria-pressed={status === 'Ditolak'}
+          className={`text-left bg-white p-3.5 rounded-xl border transition shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-600 ${
             status === 'Ditolak' ? 'border-rose-500 ring-2 ring-rose-500/10' : 'border-slate-200 hover:border-rose-300'
           }`}
         >
           <div className="text-2xl font-black text-rose-600">{ringkasan.ditolak}</div>
           <div className="text-[11px] font-semibold text-slate-500 mt-0.5">Ditolak</div>
-        </div>
+        </button>
       </div>
 
-      {/* Bar Pencarian & Filter Sesuai Wireframe 2 */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-2">
           <label className="block text-[11px] font-bold text-slate-600 mb-1">Cari</label>
@@ -152,7 +157,6 @@ export const AdminDaftarAduan: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabel Aduan Sesuai Wireframe 2 (Desktop & Responsif Kartu Mobile) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center text-xs text-slate-500">Memuat data aduan...</div>

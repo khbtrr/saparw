@@ -17,14 +17,12 @@ export const AdminDetailAduan: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  // State Verifikasi & Ubah Status sesuai Wireframe 3
   const [statusBaru, setStatusBaru] = useState<StatusAduan>('Diverifikasi');
   const [catatanStatus, setCatatanStatus] = useState('');
   const [diLuarKewenangan, setDiLuarKewenangan] = useState(false);
   const [diteruskanKepada, setDiteruskanKepada] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
-  // State Form Tanggapan
   const [isiTanggapan, setIsiTanggapan] = useState('');
   const [tanggapanMsg, setTanggapanMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
@@ -106,10 +104,13 @@ export const AdminDetailAduan: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header bar sesuai wireframe 3 */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <Link to="/admin/aduan" className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition">
+          <Link
+            to="/admin/aduan"
+            aria-label="Kembali ke daftar aduan"
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-200 transition"
+          >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
@@ -119,11 +120,8 @@ export const AdminDetailAduan: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid 2 Kolom Sesuai Wireframe 3 Desktop: Kiri Info Aduan & Riwayat, Kanan Verifikasi & Tanggapan */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Kolom Kiri: Info Aduan & Riwayat Status */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Card Info Aduan */}
           <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-4">
             <div className="flex items-start justify-between">
               <div>
@@ -162,22 +160,22 @@ export const AdminDetailAduan: React.FC = () => {
               </p>
             </div>
 
-            {/* Lampiran Foto sesuai wireframe: Foto 1, Foto 2 */}
             <div>
               <span className="text-xs font-semibold text-slate-500 block mb-2">Lampiran Foto:</span>
               {aduan.lampiran_foto && aduan.lampiran_foto.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {aduan.lampiran_foto.map((foto, idx) => (
-                    <div
+                    <button
                       key={foto.id_lampiran}
-                      className="border border-slate-200 rounded-lg overflow-hidden aspect-video relative group cursor-pointer"
+                      type="button"
                       onClick={() => window.open(foto.path_foto, '_blank')}
+                      className="border border-slate-200 rounded-lg overflow-hidden aspect-video relative group block text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
                     >
-                      <img src={foto.path_foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                      <img src={foto.path_foto} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover transition" />
                       <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
                         Foto {idx + 1}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -186,7 +184,6 @@ export const AdminDetailAduan: React.FC = () => {
             </div>
           </div>
 
-          {/* Card Riwayat Status Sesuai Wireframe 3 */}
           <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-3">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Clock className="w-4 h-4 text-slate-500" />
@@ -213,9 +210,7 @@ export const AdminDetailAduan: React.FC = () => {
           </div>
         </div>
 
-        {/* Kolom Kanan Sesuai Wireframe 3: Panel Verifikasi & Status + Panel Tanggapan */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Panel Verifikasi dan Status */}
           <form onSubmit={handleSimpanStatus} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-4">
             <h3 className="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">
               Verifikasi dan Status
@@ -255,7 +250,6 @@ export const AdminDetailAduan: React.FC = () => {
               />
             </div>
 
-            {/* Checkbox Di luar kewenangan RW sesuai Wireframe 3 */}
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
                 <input
@@ -293,7 +287,6 @@ export const AdminDetailAduan: React.FC = () => {
             </button>
           </form>
 
-          {/* Panel Tanggapan Sesuai Wireframe 3 */}
           <form onSubmit={handleKirimTanggapan} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-3">
             <h3 className="font-bold text-sm text-slate-900 border-b border-slate-100 pb-2">
               Tanggapan

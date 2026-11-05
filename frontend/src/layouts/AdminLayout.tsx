@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -17,18 +17,6 @@ export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Close mobile drawer on Escape so keyboard users can dismiss it without a mouse.
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [mobileMenuOpen]);
-
   const handleLogout = async () => {
     await logout();
     navigate('/admin/masuk');
@@ -43,26 +31,23 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
-      <header className="md:hidden bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between sticky top-0 z-40 shadow-sm no-print">
+      <header className="md:hidden bg-slate-900 text-white px-4 py-2 flex items-center justify-between sticky top-0 z-40 shadow-sm no-print">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
+          <ShieldCheck className="w-6 h-6 text-emerald-400" />
           <span className="font-bold text-sm">Pengaduan RW 05 - Panel Pengurus</span>
         </div>
         <button
           type="button"
-          aria-expanded={mobileMenuOpen}
-          aria-controls="admin-sidebar-nav"
-          aria-label={mobileMenuOpen ? 'Tutup menu pengurus' : 'Buka menu pengurus'}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="min-h-[44px] px-3 py-2 rounded-lg text-slate-200 hover:text-white hover:bg-slate-800 inline-flex items-center gap-1.5 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+          aria-label={mobileMenuOpen ? 'Tutup navigasi pengurus' : 'Buka navigasi pengurus'}
+          aria-expanded={mobileMenuOpen}
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 transition"
         >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          <span>Menu</span>
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </header>
 
       <aside
-        id="admin-sidebar-nav"
         className={`fixed md:sticky top-0 bottom-0 left-0 z-40 w-64 bg-slate-900 text-slate-200 flex flex-col justify-between transition-transform duration-200 no-print ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
@@ -73,7 +58,7 @@ export const AdminLayout: React.FC = () => {
             <p className="text-xs text-emerald-400 font-medium mt-0.5">Panel Pengurus</p>
           </div>
 
-          <nav aria-label="Menu panel pengurus" className="p-3 space-y-1.5">
+          <nav aria-label="Navigasi admin" className="p-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -82,14 +67,14 @@ export const AdminLayout: React.FC = () => {
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 ${
+                    `min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 ${
                       isActive
                         ? 'bg-emerald-700 text-white shadow-sm'
-                        : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`
                   }
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
+                  <Icon className="w-4 h-4" />
                   <span>{item.label}</span>
                 </NavLink>
               );
@@ -97,17 +82,17 @@ export const AdminLayout: React.FC = () => {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-800 flex items-center justify-between gap-2">
+        <div className="p-4 border-t border-slate-800 flex items-center justify-between">
           <div className="overflow-hidden pr-2">
             <p className="text-xs font-semibold text-white truncate">{user?.nama || 'Pengurus RW'}</p>
-            <p className="text-[11px] text-slate-300 truncate">@{user?.username}</p>
+            <p className="text-[11px] text-slate-400 truncate">@{user?.username}</p>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            aria-label="Keluar dari akun pengurus"
             title="Keluar"
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-slate-300 hover:text-rose-300 hover:bg-slate-800 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+            aria-label="Keluar dari akun pengurus"
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-400"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -124,8 +109,8 @@ export const AdminLayout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <div className="hidden md:flex items-center justify-end px-8 py-3 bg-white border-b border-slate-200 no-print">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-            <span>Ketua RW 05</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Pengurus RW 05</span>
           </div>
         </div>
 

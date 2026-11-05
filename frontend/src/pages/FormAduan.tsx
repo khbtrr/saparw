@@ -8,7 +8,6 @@ import {
   AlertCircle,
   CheckCircle2,
   FileText,
-  RefreshCw,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '../lib/api';
 import type { KategoriFasilitas, Pengaduan } from '../types';
@@ -29,12 +28,7 @@ export const FormAduan: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [suksesAduan, setSuksesAduan] = useState<Pengaduan | null>(null);
 
-  const {
-    data: catData,
-    isLoading: isLoadingCat,
-    isError: isErrorCat,
-    refetch: refetchCat,
-  } = useQuery<{ data: KategoriFasilitas[] }>({
+  const { data: catData } = useQuery<{ data: KategoriFasilitas[] }>({
     queryKey: ['kategori'],
     queryFn: () => apiFetch('/api/kategori'),
   });
@@ -125,7 +119,7 @@ export const FormAduan: React.FC = () => {
       return;
     }
     if (!lokasi.trim()) {
-      setErrorMsg('Masukkan informasi lokasi (mis. RT 02, depan pos ronda).');
+      setErrorMsg('Masukkan informasi lokasi (mis. RT 02, depan pos).');
       return;
     }
     if (!uraian.trim()) {
@@ -143,41 +137,39 @@ export const FormAduan: React.FC = () => {
 
   if (suksesAduan) {
     return (
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-4 shadow-elev-1">
-        <div className="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle2 className="w-8 h-8" />
+      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-4 shadow-sm">
+        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle2 className="w-10 h-10" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Pengaduan Berhasil Terkirim</h2>
+        <h2 className="text-xl font-bold text-slate-900">Pengaduan Berhasil Terkirim!</h2>
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-600">Nomor Aduan:</span>
+            <span className="text-slate-500">Nomor Aduan:</span>
             <span className="font-mono font-bold text-emerald-800 text-sm">{suksesAduan.nomor_pengaduan}</span>
           </div>
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-600">Status Awal:</span>
-            <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full font-semibold text-xs">
+            <span className="text-slate-500">Status Awal:</span>
+            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold text-[11px]">
               Diajukan
             </span>
           </div>
-          <p className="text-xs text-slate-700 pt-2 border-t border-slate-200">
+          <p className="text-xs text-slate-600 pt-2 border-t border-slate-200">
             Pengurus RW 05 akan segera memeriksa dan memverifikasi laporan fasilitas Anda.
           </p>
         </div>
 
-        <div className="pt-2 space-y-2.5">
+        <div className="pt-2 space-y-2">
           <button
-            type="button"
             onClick={() => navigate(`/warga/aduan/${suksesAduan.id_pengaduan}`)}
-            className="w-full min-h-[44px] py-2.5 px-4 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-dark transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full min-h-[44px] py-2.5 px-4 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition"
           >
-            Lihat Rincian &amp; Status Aduan
+            Lihat Status Aduan
           </button>
           <button
-            type="button"
             onClick={() => navigate('/warga/aduan')}
-            className="w-full min-h-[44px] py-2.5 px-4 bg-slate-100 text-slate-800 rounded-xl text-xs font-semibold hover:bg-slate-200 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full min-h-[44px] py-2.5 px-4 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-200 transition"
           >
-            Kembali ke Daftar Aduan Saya
+            Kembali ke Daftar Aduan
           </button>
         </div>
       </div>
@@ -189,57 +181,33 @@ export const FormAduan: React.FC = () => {
       <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
         <Link
           to="/warga/aduan"
-          aria-label="Kembali ke daftar aduan saya"
-          className="min-h-[44px] min-w-[44px] -ml-2 inline-flex items-center justify-center rounded-lg text-slate-700 hover:bg-slate-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          aria-label="Kembali ke daftar aduan"
+          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 -ml-2 text-slate-600 hover:text-slate-900 rounded-lg transition"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h2 className="text-lg font-bold text-slate-900 tracking-tight">Formulir Pengaduan Baru</h2>
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight">Form Aduan</h2>
       </div>
 
       {errorMsg && (
-        <div
-          role="alert"
-          className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-start gap-2"
-        >
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-start gap-2">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      {isErrorCat && (
-        <div
-          role="alert"
-          className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center justify-between gap-2"
-        >
-          <span>Gagal memuat daftar kategori fasilitas.</span>
-          <button
-            type="button"
-            onClick={() => refetchCat()}
-            className="min-h-[44px] px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-800 font-semibold inline-flex items-center gap-1"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Muat Ulang</span>
-          </button>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-elev-1 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
         <div>
-          <label htmlFor="form-kategori" className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Kategori Fasilitas
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            Kategori
           </label>
           <select
-            id="form-kategori"
             value={idKategori}
             onChange={(e) => setIdKategori(e.target.value)}
             required
-            disabled={isLoadingCat}
-            className="w-full min-h-[44px] px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50/50"
           >
-            <option value="">
-              {isLoadingCat ? 'Memuat kategori fasilitas...' : 'Pilih kategori fasilitas'}
-            </option>
+            <option value="">Pilih Kategori</option>
             {catData?.data?.map((cat) => (
               <option key={cat.id_kategori} value={cat.id_kategori}>
                 {cat.nama_kategori}
@@ -249,42 +217,40 @@ export const FormAduan: React.FC = () => {
         </div>
 
         <div>
-          <label htmlFor="form-lokasi" className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Lokasi di Lingkungan RW 05
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            Lokasi RT
           </label>
           <input
-            id="form-lokasi"
             type="text"
             required
-            placeholder="Contoh: RT 02, dekat patokan lokasi"
+            placeholder="Masukkan Lokasi RT (contoh: RT 02, samping Pos Ronda)"
             value={lokasi}
             onChange={(e) => setLokasi(e.target.value)}
-            className="w-full min-h-[44px] px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50/50"
           />
         </div>
 
         <div>
-          <label htmlFor="form-uraian" className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Uraian Masalah
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            Uraian
           </label>
           <textarea
-            id="form-uraian"
             required
             rows={4}
-            placeholder="Jelaskan kondisi kerusakan fasilitas dan dampaknya..."
+            placeholder="Tulis uraian aduan secara jelas..."
             value={uraian}
             onChange={(e) => setUraian(e.target.value)}
-            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 text-slate-900 bg-slate-50/50 resize-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50/50 resize-none"
           />
         </div>
 
         <div>
-          <span className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Lampiran Foto Bukti (Opsional, Maksimal 3 Foto)
-          </span>
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            Foto (Opsional, Maks 3 Foto)
+          </label>
 
           {fotos.length > 0 && (
-            <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+            <div className="grid grid-cols-3 gap-2 mb-2">
               {fotos.map((item, idx) => (
                 <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200">
                   <img src={item.previewUrl} alt={`Lampiran ${idx + 1}`} className="w-full h-full object-cover" />
@@ -292,7 +258,7 @@ export const FormAduan: React.FC = () => {
                     type="button"
                     onClick={() => removeFoto(idx)}
                     aria-label={`Hapus foto ${idx + 1}`}
-                    className="absolute top-1 right-1 min-h-[36px] min-w-[36px] inline-flex items-center justify-center bg-slate-900/80 text-white rounded-full hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                    className="absolute top-1 right-1 min-h-[36px] min-w-[36px] inline-flex items-center justify-center bg-black/70 text-white rounded-full hover:bg-rose-600 transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -302,20 +268,16 @@ export const FormAduan: React.FC = () => {
           )}
 
           {fotos.length < 3 && (
-            <label
-              htmlFor="form-upload-foto"
-              className="border-2 border-dashed border-slate-300 hover:border-primary rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-primary-soft/40 transition-colors text-center focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary"
-            >
-              <Upload className="w-5 h-5 text-slate-600 mb-1" />
-              <span className="text-xs font-semibold text-slate-800">Tambah Foto Kondisi Lapangan</span>
-              <span className="text-xs text-slate-600 mt-0.5">Format JPG, PNG, atau WebP (Maksimal 2 MB)</span>
+            <label className="border-2 border-dashed border-slate-300 hover:border-emerald-600 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer bg-slate-50 hover:bg-emerald-50/30 transition text-center">
+              <Upload className="w-5 h-5 text-slate-400 mb-1" />
+              <span className="text-xs font-semibold text-slate-700">+ Upload Foto</span>
+              <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, atau WebP (Maks 2 MB)</span>
               <input
-                id="form-upload-foto"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 onChange={handleFileChange}
-                className="sr-only"
+                className="hidden"
               />
             </label>
           )}
@@ -324,13 +286,10 @@ export const FormAduan: React.FC = () => {
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full min-h-[44px] mt-4 py-3 px-4 rounded-xl font-bold text-sm text-white bg-primary hover:bg-primary-dark transition-colors shadow-elev-1 flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="w-full mt-4 min-h-[44px] py-3 px-4 rounded-xl font-bold text-sm text-white bg-slate-900 hover:bg-slate-800 transition shadow flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {mutation.isPending ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Mengirim Pengaduan...</span>
-            </>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
               <FileText className="w-4 h-4" />

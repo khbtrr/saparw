@@ -36,7 +36,6 @@ export const AdminRekap: React.FC = () => {
   const [kategori, setKategori] = useState('semua');
   const [status, setStatus] = useState('semua');
 
-  // Trigger rekap query
   const { data: catData } = useQuery<{ data: KategoriFasilitas[] }>({
     queryKey: ['kategori'],
     queryFn: () => apiFetch('/api/kategori'),
@@ -63,22 +62,21 @@ export const AdminRekap: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header bar sesuai wireframe 6: Rekap Pengaduan */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between no-print">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Rekap Pengaduan</h2>
           <p className="text-xs text-slate-500">Rekapitulasi dan cetak laporan pengaduan fasilitas lingkungan</p>
         </div>
         <button
+          type="button"
           onClick={handleCetak}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition shadow"
+          className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900"
         >
           <Printer className="w-4 h-4" />
           <span>Cetak Laporan</span>
         </button>
       </div>
 
-      {/* Filter Sesuai Wireframe 6: Dari, Sampai, Kategori, Status, Tombol Tampilkan */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm no-print space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           <div>
@@ -144,7 +142,6 @@ export const AdminRekap: React.FC = () => {
         </div>
       </div>
 
-      {/* Kop Surat Khusus Mode Print (Muncul hanya saat Cetak Dokumen) */}
       <div className="hidden print:block text-center border-b-2 border-slate-800 pb-3 mb-4">
         <h1 className="text-xl font-black uppercase tracking-wider text-slate-900">
           RUKUN WARGA 05 DESA KARANGRAHARJA
@@ -157,7 +154,6 @@ export const AdminRekap: React.FC = () => {
         </p>
       </div>
 
-      {/* Tabel Matriks Kategori x Status Sesuai Wireframe 6 */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
@@ -206,7 +202,6 @@ export const AdminRekap: React.FC = () => {
         </div>
       </div>
 
-      {/* Keterangan Singkatan Sesuai Wireframe 6 */}
       <div className="text-[11px] text-slate-500 space-y-1">
         <p className="font-semibold text-slate-700">Keterangan Status:</p>
         <p>
@@ -214,18 +209,17 @@ export const AdminRekap: React.FC = () => {
         </p>
       </div>
 
-      {/* Tombol Cetak Bawah Sesuai Wireframe 6 */}
       <div className="flex justify-end pt-2 no-print">
         <button
+          type="button"
           onClick={handleCetak}
-          className="py-2 px-6 rounded-lg font-bold text-xs text-white bg-slate-900 hover:bg-slate-800 transition shadow flex items-center gap-2"
+          className="min-h-[44px] py-2 px-6 rounded-lg font-bold text-xs text-white bg-slate-900 hover:bg-slate-800 transition shadow flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900"
         >
           <Printer className="w-4 h-4" />
           <span>Cetak Laporan</span>
         </button>
       </div>
 
-      {/* Tanda Tangan Khusus Print */}
       <div className="hidden print:flex justify-between items-end pt-12 text-xs">
         <div>
           <p>Mengetahui,</p>
