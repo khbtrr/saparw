@@ -56,6 +56,13 @@ export const handlers = [
       );
     }
 
+    if (body.password.length < 8) {
+      return HttpResponse.json(
+        { message: 'Kata sandi minimal 8 karakter.', errors: { password: ['Kata sandi minimal 8 karakter.'] } },
+        { status: 422 }
+      );
+    }
+
     const users = db.getPengguna();
     if (users.some((u) => u.username.toLowerCase() === body.username?.trim().toLowerCase())) {
       return HttpResponse.json(
@@ -135,10 +142,16 @@ export const handlers = [
     const session = db.getSession();
     if (!session) return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-    const body = (await request.json()) as { password_baru?: string };
-    if (!body.password_baru || body.password_baru.length < 5) {
+    const body = (await request.json()) as { password_lama?: string; password_baru?: string };
+    if (!body.password_lama) {
       return HttpResponse.json(
-        { message: 'Validasi gagal.', errors: { password_baru: ['Password minimal 5 karakter.'] } },
+        { message: 'Kata sandi saat ini wajib diisi.', errors: { password_lama: ['Kata sandi saat ini wajib diisi.'] } },
+        { status: 422 }
+      );
+    }
+    if (!body.password_baru || body.password_baru.length < 8) {
+      return HttpResponse.json(
+        { message: 'Validasi gagal.', errors: { password_baru: ['Kata sandi baru minimal 8 karakter.'] } },
         { status: 422 }
       );
     }
@@ -579,8 +592,8 @@ export const handlers = [
       return HttpResponse.json({ message: 'Nama, username, password, dan peran wajib diisi.' }, { status: 422 });
     }
 
-    if (body.password.length < 5) {
-      return HttpResponse.json({ message: 'Kata sandi minimal 5 karakter.' }, { status: 422 });
+    if (body.password.length < 8) {
+      return HttpResponse.json({ message: 'Kata sandi minimal 8 karakter.' }, { status: 422 });
     }
 
     const users = db.getPengguna();
@@ -728,8 +741,8 @@ export const handlers = [
 
     const id = Number(params.id);
     const body = (await request.json()) as { password?: string };
-    if (!body.password || body.password.length < 5) {
-      return HttpResponse.json({ message: 'Kata sandi baru minimal 5 karakter.' }, { status: 422 });
+    if (!body.password || body.password.length < 8) {
+      return HttpResponse.json({ message: 'Kata sandi baru minimal 8 karakter.' }, { status: 422 });
     }
 
     const users = db.getPengguna();

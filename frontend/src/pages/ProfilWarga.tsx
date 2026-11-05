@@ -11,6 +11,7 @@ export const ProfilWarga: React.FC = () => {
   const [savingProfil, setSavingProfil] = useState(false);
   const [msgProfil, setMsgProfil] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
+  const [passwordLama, setPasswordLama] = useState('');
   const [passwordBaru, setPasswordBaru] = useState('');
   const [savingPass, setSavingPass] = useState(false);
   const [msgPass, setMsgPass] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
@@ -40,8 +41,12 @@ export const ProfilWarga: React.FC = () => {
     try {
       await apiFetch('/api/auth/password', {
         method: 'PUT',
-        body: JSON.stringify({ password_baru: passwordBaru }),
+        body: JSON.stringify({
+          password_lama: passwordLama,
+          password_baru: passwordBaru,
+        }),
       });
+      setPasswordLama('');
       setPasswordBaru('');
       setMsgPass({ type: 'ok', text: 'Kata sandi berhasil diubah!' });
     } catch (err) {
@@ -139,11 +144,24 @@ export const ProfilWarga: React.FC = () => {
         )}
 
         <div>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi Saat Ini</label>
+          <input
+            type="password"
+            required
+            placeholder="Masukkan kata sandi saat ini"
+            value={passwordLama}
+            onChange={(e) => setPasswordLama(e.target.value)}
+            className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 bg-slate-50/50"
+          />
+        </div>
+
+        <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi Baru</label>
           <input
             type="password"
             required
-            placeholder="Minimal 5 karakter"
+            minLength={8}
+            placeholder="Minimal 8 karakter"
             value={passwordBaru}
             onChange={(e) => setPasswordBaru(e.target.value)}
             className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 bg-slate-50/50"
@@ -153,7 +171,7 @@ export const ProfilWarga: React.FC = () => {
         <button
           type="submit"
           disabled={savingPass}
-          className="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition disabled:opacity-50"
+          className="w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition disabled:opacity-50"
         >
           {savingPass ? 'Mengubah...' : 'Perbarui Kata Sandi'}
         </button>

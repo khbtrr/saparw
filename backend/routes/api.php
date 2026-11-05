@@ -10,8 +10,8 @@ Route::get('/publik/statistik', [PublicController::class, 'statistik']);
 Route::get('/publik/aduan-selesai', [PublicController::class, 'aduanSelesai']);
 Route::get('/kategori', [PublicController::class, 'kategori']);
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::middleware(['auth:sanctum', 'active_user'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);

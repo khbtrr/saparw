@@ -235,8 +235,8 @@ export const AdminVerifikasiAkun: React.FC = () => {
       return;
     }
 
-    if (formData.password.length < 5) {
-      setFormError('Kata sandi minimal 5 karakter.');
+    if (formData.password.length < 8) {
+      setFormError('Kata sandi minimal 8 karakter.');
       return;
     }
 
@@ -279,8 +279,8 @@ export const AdminVerifikasiAkun: React.FC = () => {
     e.preventDefault();
     setResetError(null);
 
-    if (!newPassword || newPassword.length < 5) {
-      setResetError('Kata sandi baru minimal 5 karakter.');
+    if (!newPassword || newPassword.length < 8) {
+      setResetError('Kata sandi baru minimal 8 karakter.');
       return;
     }
 
@@ -986,7 +986,8 @@ export const AdminVerifikasiAkun: React.FC = () => {
                 <input
                   type="password"
                   required
-                  placeholder="Minimal 5 karakter"
+                  minLength={8}
+                  placeholder="Minimal 8 karakter"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-600"

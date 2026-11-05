@@ -10,12 +10,18 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $adminUsername = env('ADMIN_INITIAL_USERNAME', 'admin');
+        $adminPassword = env(
+            'ADMIN_INITIAL_PASSWORD',
+            app()->environment('production') ? 'SapaRW05#Karangraharja2026' : 'admin123'
+        );
+
         DB::table('pengguna')->insert([
             [
                 'id_pengguna' => 1,
                 'nama' => 'Ketua RW 05 (Pak Bambang)',
-                'username' => 'admin',
-                'password' => Hash::make('admin123'),
+                'username' => $adminUsername,
+                'password' => Hash::make($adminPassword),
                 'peran' => 'admin',
                 'aktif' => true,
                 'rt' => '01',

@@ -9,9 +9,9 @@ Route::get('/', function () {
 
 // Serve public disk files when Windows symlink creation is unavailable without Administrator privileges.
 Route::get('/storage/{path}', function (string $path) {
-    if (! Storage::disk('public')->exists($path)) {
+    if (str_contains($path, '..') || ! Storage::disk('public')->exists($path)) {
         abort(404);
     }
 
     return Storage::disk('public')->response($path);
-})->where('path', '.*');
+})->where('path', '^aduan/[A-Za-z0-9_.-]+$');

@@ -17,8 +17,12 @@ class AduanController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Pengaduan::with(['kategori', 'lampiran_foto', 'tanggapan.pengurus', 'riwayat_status.pencatat'])
-            ->where('id_pelapor', $user->id_pengguna);
+        $query = Pengaduan::with([
+            'kategori',
+            'lampiran_foto',
+            'tanggapan.pengurus:id_pengguna,nama,peran',
+            'riwayat_status.pencatat:id_pengguna,nama,peran',
+        ])->where('id_pelapor', $user->id_pengguna);
 
         if ($request->has('status') && $request->status !== 'Semua') {
             $query->where('status_terkini', $request->status);
@@ -43,8 +47,8 @@ class AduanController extends Controller
             'kategori',
             'pelapor',
             'lampiran_foto',
-            'tanggapan.pengurus',
-            'riwayat_status.pencatat',
+            'tanggapan.pengurus:id_pengguna,nama,peran',
+            'riwayat_status.pencatat:id_pengguna,nama,peran',
         ])->find($id);
 
         if (! $aduan) {
@@ -79,12 +83,13 @@ class AduanController extends Controller
         if ($request->hasFile('fotos')) {
             $rules['fotos.*'] = 'file|image|mimes:jpg,jpeg,png,webp|max:2048';
         } else {
-            $rules['fotos.*'] = 'nullable|string';
+            $rules['fotos.*'] = ['nullable', 'string', 'regex:/^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+\/=]+$/i'];
         }
 
         $request->validate($rules, [
             'fotos.max' => 'Maksimal lampiran adalah 3 foto.',
             'fotos.*.image' => 'Lampiran harus berupa gambar (JPG, PNG, atau WebP).',
+            'fotos.*.regex' => 'Format data gambar tidak valid.',
             'fotos.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
         ]);
 
@@ -150,7 +155,11 @@ class AduanController extends Controller
 
             return response()->json([
                 'message' => 'Pengaduan berhasil diajukan.',
-                'data' => $aduan->load(['kategori', 'lampiran_foto', 'riwayat_status.pencatat']),
+                'data' => $aduan->load([
+                    'kategori',
+                    'lampiran_foto',
+                    'riwayat_status.pencatat:id_pengguna,nama,peran',
+                ]),
             ], 201);
         });
     }
@@ -175,8 +184,8 @@ class AduanController extends Controller
         }
 
         foreach ($aduan->lampiran_foto as $foto) {
-            if ($foto->path_foto && str_starts_with($foto->path_foto, '/storage/')) {
-                $relativePath = substr($foto->path_foto, strlen('/storage/'));
+            if ($foto->path_foto && str_starts_with($foto->path_foto, '/storage/aduan/')) {
+                $relativePath = 'aduan/' . basename($foto->path_foto);
                 Storage::disk('public')->delete($relativePath);
             }
         }
@@ -191,11 +200,15 @@ class AduanController extends Controller
     private function storeUploadedFotos(Request $request, int $idPengaduan): array
     {
         $paths = [];
+        $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
 
         if ($request->hasFile('fotos')) {
             foreach ($request->file('fotos') as $idx => $file) {
                 if ($file instanceof UploadedFile && $file->isValid()) {
-                    $ext = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                    $ext = strtolower($file->guessExtension() ?: 'jpg');
+                    if ($ext === 'jpeg' || ! in_array($ext, $allowedExts, true)) {
+                        $ext = 'jpg';
+                    }
                     $filename = "aduan_{$idPengaduan}_" . ($idx + 1) . '_' . Str::random(8) . ".{$ext}";
                     $stored = $file->storeAs('aduan', $filename, 'public');
                     $paths[] = '/storage/' . $stored;
@@ -206,21 +219,27 @@ class AduanController extends Controller
         }
 
         if (is_array($request->fotos)) {
+            $allowedMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
             foreach ($request->fotos as $idx => $fotoData) {
                 if (empty($fotoData) || ! is_string($fotoData)) {
                     continue;
                 }
 
-                if (preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,(.+)$/i', $fotoData, $matches)) {
-                    $ext = strtolower($matches[1]) === 'jpeg' ? 'jpg' : strtolower($matches[1]);
+                if (preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+\/=]+)$/i', $fotoData, $matches)) {
                     $binary = base64_decode($matches[2], true);
-                    if ($binary !== false) {
-                        $filename = "aduan/aduan_{$idPengaduan}_" . ($idx + 1) . '_' . Str::random(8) . ".{$ext}";
-                        Storage::disk('public')->put($filename, $binary);
-                        $paths[] = '/storage/' . $filename;
+                    if ($binary === false || strlen($binary) > 2 * 1024 * 1024) {
+                        continue;
                     }
-                } elseif (mb_strlen($fotoData) <= 255) {
-                    $paths[] = $fotoData;
+
+                    $imageInfo = @getimagesizefromstring($binary);
+                    if ($imageInfo === false || ! isset($allowedMimes[$imageInfo['mime']])) {
+                        continue;
+                    }
+
+                    $ext = $allowedMimes[$imageInfo['mime']];
+                    $filename = "aduan/aduan_{$idPengaduan}_" . ($idx + 1) . '_' . Str::random(8) . ".{$ext}";
+                    Storage::disk('public')->put($filename, $binary);
+                    $paths[] = '/storage/' . $filename;
                 }
             }
         }

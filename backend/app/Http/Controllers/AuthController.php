@@ -14,13 +14,13 @@ class AuthController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
             'username' => 'required|string|max:50|unique:pengguna,username',
-            'password' => 'required|string|min:5',
+            'password' => 'required|string|min:8',
             'rt' => 'nullable|string|max:3',
             'no_rumah' => 'nullable|string|max:10',
             'no_hp' => 'nullable|string|max:20',
         ], [
             'username.unique' => 'Username sudah digunakan warga lain.',
-            'password.min' => 'Kata sandi minimal 5 karakter.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
         ]);
 
         $user = Pengguna::create([
@@ -118,14 +118,32 @@ class AuthController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'password_baru' => 'required|string|min:5',
+            'password_lama' => 'required|string',
+            'password_baru' => 'required|string|min:8',
         ], [
-            'password_baru.min' => 'Password minimal 5 karakter.',
+            'password_lama.required' => 'Kata sandi saat ini wajib diisi.',
+            'password_baru.min' => 'Kata sandi baru minimal 8 karakter.',
         ]);
 
         $user = $request->user();
+
+        if (! Hash::check($request->password_lama, $user->password)) {
+            return response()->json([
+                'message' => 'Kata sandi saat ini tidak sesuai.',
+                'errors' => [
+                    'password_lama' => ['Kata sandi saat ini tidak sesuai.'],
+                ],
+            ], 422);
+        }
+
         $user->password = Hash::make($request->password_baru);
         $user->save();
+
+        // Revoke other active tokens while keeping the current session alive.
+        $currentToken = $user->currentAccessToken();
+        if ($currentToken && isset($currentToken->id)) {
+            $user->tokens()->where('id', '!=', $currentToken->id)->delete();
+        }
 
         return response()->json([
             'message' => 'Kata sandi berhasil diubah.',

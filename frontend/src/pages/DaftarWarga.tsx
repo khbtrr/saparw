@@ -149,7 +149,8 @@ export const DaftarWarga: React.FC = () => {
               <input
                 type="password"
                 required
-                placeholder="Minimal 5 karakter"
+                minLength={8}
+                placeholder="Minimal 8 karakter"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-600 transition bg-slate-50/50"

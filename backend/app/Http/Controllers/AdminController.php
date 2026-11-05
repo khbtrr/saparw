@@ -104,7 +104,10 @@ class AdminController extends Controller
 
             return response()->json([
                 'message' => 'Status berhasil diperbarui.',
-                'data' => $aduan->load(['riwayat_status.pencatat', 'tanggapan.pengurus']),
+                'data' => $aduan->load([
+                    'riwayat_status.pencatat:id_pengguna,nama,peran',
+                    'tanggapan.pengurus:id_pengguna,nama,peran',
+                ]),
             ]);
         });
     }
@@ -134,7 +137,7 @@ class AdminController extends Controller
 
         return response()->json([
             'message' => 'Tanggapan berhasil dikirim.',
-            'data' => $tanggapan->load('pengurus'),
+            'data' => $tanggapan->load('pengurus:id_pengguna,nama,peran'),
         ]);
     }
 
@@ -182,14 +185,14 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
             'username' => 'required|string|max:50|unique:pengguna,username',
-            'password' => 'required|string|min:5',
+            'password' => 'required|string|min:8',
             'peran' => 'required|in:warga,admin',
             'rt' => 'nullable|string|max:3',
             'no_rumah' => 'nullable|string|max:10',
             'no_hp' => 'nullable|string|max:20',
         ], [
             'username.unique' => 'Username sudah digunakan akun lain.',
-            'password.min' => 'Kata sandi minimal 5 karakter.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
             'peran.in' => 'Peran pengguna harus warga atau admin.',
         ]);
 
@@ -336,17 +339,16 @@ class AdminController extends Controller
         }
 
         $request->validate([
-            'password' => 'required|string|min:5',
+            'password' => 'required|string|min:8',
         ], [
-            'password.min' => 'Kata sandi baru minimal 5 karakter.',
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
         ]);
 
         $user->password = $request->password;
         $user->save();
 
-        if (! $user->aktif) {
-            $user->tokens()->delete();
-        }
+        // Revoke all active tokens immediately when an account password is reset.
+        $user->tokens()->delete();
 
         $peranLabel = $user->peran === 'admin' ? 'pengurus RW' : 'warga';
 

@@ -45,6 +45,8 @@ services:
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: sync
+      ADMIN_INITIAL_USERNAME: ${ADMIN_INITIAL_USERNAME:-admin}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-SapaRW05#Karangraharja2026}
     volumes:
       - saparw_storage_public:/var/www/saparw/backend/storage/app/public
 
