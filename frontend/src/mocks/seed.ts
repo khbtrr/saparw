@@ -72,7 +72,7 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     nomor_pengaduan: 'ADU-2026-001',
     id_pelapor: 2,
     id_kategori: 1,
-    judul: 'Lampu Jalan – Lampu di gang 2 RT 02 mati total sudah 3 hari',
+    judul: 'Lampu Jalan: Lampu di gang 2 RT 02 mati total sudah 3 hari',
     isi_pengaduan: 'Lampu penerangan jalan di tiang depan rumah No 12 gang 2 mati sejak hari Selasa, kondisi gang sangat gelap di malam hari membahayakan warga.',
     lokasi: 'RT 02, dekat tiang listrik depan rumah No 12',
     status_terkini: 'Diajukan',
@@ -93,7 +93,7 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     nomor_pengaduan: 'ADU-2026-002',
     id_pelapor: 5,
     id_kategori: 2,
-    judul: 'Saluran Got – Saluran got tersumbat sampah plastik dan meluap',
+    judul: 'Saluran Got: Saluran got tersumbat sampah plastik dan meluap',
     isi_pengaduan: 'Got utama RT 01 mampet karena tumpukan sampah kiriman dan endapan lumpur, air meluap ke badan jalan setiap hujan deras.',
     lokasi: 'RT 01, jalan utama samping pos ronda',
     status_terkini: 'Diverifikasi',
@@ -117,7 +117,7 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     nomor_pengaduan: 'ADU-2026-003',
     id_pelapor: 2,
     id_kategori: 3,
-    judul: 'Jalan Rusak – Jalan berlubang cukup dalam di persimpangan gang',
+    judul: 'Jalan Rusak: Jalan berlubang cukup dalam di persimpangan gang',
     isi_pengaduan: 'Ada lubang aspal berdiameter 60cm dengan kedalaman 10cm. Sudah ada warga yang terpeleset saat naik motor malam hari.',
     lokasi: 'RT 02, persimpangan gang Cendana IV',
     status_terkini: 'Diproses',
@@ -142,7 +142,7 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     nomor_pengaduan: 'ADU-2026-004',
     id_pelapor: 5,
     id_kategori: 4,
-    judul: 'Pos Ronda – Atap pos ronda bocor dan papan tempat duduk lapuk',
+    judul: 'Pos Ronda: Atap pos ronda bocor dan papan tempat duduk lapuk',
     isi_pengaduan: 'Atap asbes pos kamling pecah terkena ranting pohon, air masuk saat hujan sehingga warga tidak bisa jaga malam dengan nyaman.',
     lokasi: 'RT 04, Jl. Manggis No. 01 samping gerbang',
     status_terkini: 'Selesai',
@@ -150,7 +150,9 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     diajukan_pada: '2026-10-15 11:00:00',
     diperbarui_pada: '2026-10-18 16:00:00',
     dilihat_pelapor_pada: '2026-10-18 17:00:00',
-    lampiran_foto: [],
+    lampiran_foto: [
+      { id_lampiran: 4, id_pengaduan: 4, path_foto: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=600&q=80', keterangan: 'Kondisi atap pos ronda saat dilaporkan', diunggah_pada: '2026-10-15 11:00:00' }
+    ],
     riwayat_status: [
       { id_riwayat: 7, id_pengaduan: 4, id_pencatat: 5, status_sebelumnya: null, status_baru: 'Diajukan', catatan: null, dicatat_pada: '2026-10-15 11:00:00' },
       { id_riwayat: 8, id_pengaduan: 4, id_pencatat: 1, status_sebelumnya: 'Diajukan', status_baru: 'Diverifikasi', catatan: 'Diverifikasi pengurus', dicatat_pada: '2026-10-15 13:00:00' },
@@ -166,7 +168,7 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
     nomor_pengaduan: 'ADU-2026-005',
     id_pelapor: 2,
     id_kategori: 5,
-    judul: 'Sampah – Sampah liar menumpuk di tanah kosong perbatasan RT',
+    judul: 'Sampah: Sampah liar menumpuk di tanah kosong perbatasan RT',
     isi_pengaduan: 'Banyak kantong sampah plastik dibuang sembarangan oleh orang lewat di pinggir jalan tanah kosong, bau menyengat.',
     lokasi: 'RT 05, tanah kosong Jl. Dahlia',
     status_terkini: 'Selesai',
@@ -179,14 +181,16 @@ export const INITIAL_PENGADUAN: Pengaduan[] = [
       { id_riwayat: 11, id_pengaduan: 5, id_pencatat: 2, status_sebelumnya: null, status_baru: 'Diajukan', catatan: null, dicatat_pada: '2026-10-10 09:00:00' },
       { id_riwayat: 12, id_pengaduan: 5, id_pencatat: 1, status_sebelumnya: 'Diajukan', status_baru: 'Selesai', catatan: 'Sampah sudah diangkut armada kebersihan desa dan dipasang spanduk dilarang membuang sampah', dicatat_pada: '2026-10-12 11:00:00' }
     ],
-    tanggapan: []
+    tanggapan: [
+      { id_tanggapan: 5, id_pengaduan: 5, id_pengurus: 1, isi_tanggapan: 'Tumpukan sampah telah diangkut bersama armada kebersihan desa dan lokasi sudah dipasang papan larangan buang sampah.', ditanggapi_pada: '2026-10-12 11:10:00', nama_pengurus: 'Ketua RW 05' }
+    ]
   },
   {
     id_pengaduan: 6,
     nomor_pengaduan: 'ADU-2026-006',
     id_pelapor: 2,
     id_kategori: 1,
-    judul: 'Lampu Jalan – Pasang lampu hias pribadi di tiang jalan',
+    judul: 'Lampu Jalan: Pasang lampu hias pribadi di tiang jalan',
     isi_pengaduan: 'Mohon RW memasangkan lampu sorot warna-warni pribadi saya di tiang jalan umum.',
     lokasi: 'RT 02, tiang listrik pribadi',
     status_terkini: 'Ditolak',

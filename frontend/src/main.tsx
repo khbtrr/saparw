@@ -16,14 +16,15 @@ const queryClient = new QueryClient({
 });
 
 async function prepareApp() {
-  // Aktifkan Mock Service Worker saat mode development / saat backend belum tersambung
-  const { worker } = await import('./mocks/browser');
-  return worker.start({
-    onUnhandledRequest: 'bypass',
-    serviceWorker: {
-      url: '/mockServiceWorker.js',
-    },
-  });
+  if (import.meta.env.VITE_USE_MOCKS === 'true') {
+    const { worker } = await import('./mocks/browser');
+    return worker.start({
+      onUnhandledRequest: 'bypass',
+      serviceWorker: {
+        url: '/mockServiceWorker.js',
+      },
+    });
+  }
 }
 
 prepareApp().then(() => {

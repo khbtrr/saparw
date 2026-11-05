@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Megaphone, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch, ApiError } from '../lib/api';
@@ -7,6 +7,7 @@ import type { Pengguna } from '../types';
 
 export const LoginWarga: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -14,13 +15,16 @@ export const LoginWarga: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const fromPath = (location.state as { from?: string } | null)?.from;
+  const showDemoHint = import.meta.env.VITE_SHOW_DEMO_HINT === 'true';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setLoading(true);
 
     try {
-      const res = await apiFetch<{ data: { user: Pengguna } }>('/api/auth/login', {
+      const res = await apiFetch<{ data: { user: Pengguna; token?: string } }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({
           username,
@@ -30,7 +34,8 @@ export const LoginWarga: React.FC = () => {
       });
 
       login(res.data);
-      navigate('/warga/aduan');
+      const target = fromPath && fromPath.startsWith('/warga') ? fromPath : '/warga/aduan';
+      navigate(target, { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
@@ -44,7 +49,6 @@ export const LoginWarga: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
-      {/* Phone container style to match wireframe 1: Login Warga */}
       <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden p-6 sm:p-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 mb-3 shadow-inner">
@@ -92,6 +96,7 @@ export const LoginWarga: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                 className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -130,12 +135,13 @@ export const LoginWarga: React.FC = () => {
           </div>
         </div>
 
-        {/* Demo Credential Helper */}
-        <div className="mt-6 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600">
-          <p className="font-bold text-slate-700 mb-0.5">Akun Demo Warga:</p>
-          <p>Username: <code className="bg-slate-200 px-1 rounded">warga01</code> (Aktif)</p>
-          <p>Password: <code className="bg-slate-200 px-1 rounded">bebas</code></p>
-        </div>
+        {showDemoHint && (
+          <div className="mt-6 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600">
+            <p className="font-bold text-slate-700 mb-0.5">Akun Demo Warga:</p>
+            <p>Username: <code className="bg-slate-200 px-1 rounded">warga01</code> (Aktif)</p>
+            <p>Password: <code className="bg-slate-200 px-1 rounded">warga123</code></p>
+          </div>
+        )}
       </div>
     </div>
   );

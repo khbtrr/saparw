@@ -12,6 +12,11 @@ import {
 import { apiFetch, ApiError } from '../lib/api';
 import type { KategoriFasilitas, Pengaduan } from '../types';
 
+interface SelectedFoto {
+  file: File;
+  previewUrl: string;
+}
+
 export const FormAduan: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -19,24 +24,50 @@ export const FormAduan: React.FC = () => {
   const [idKategori, setIdKategori] = useState<string>('');
   const [lokasi, setLokasi] = useState<string>('');
   const [uraian, setUraian] = useState<string>('');
-  const [fotos, setFotos] = useState<string[]>([]);
+  const [fotos, setFotos] = useState<SelectedFoto[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [suksesAduan, setSuksesAduan] = useState<Pengaduan | null>(null);
 
-  // Ambil list kategori aktif
   const { data: catData } = useQuery<{ data: KategoriFasilitas[] }>({
     queryKey: ['kategori'],
     queryFn: () => apiFetch('/api/kategori'),
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: { id_kategori: number; lokasi: string; isi_pengaduan: string; fotos: string[] }) =>
-      apiFetch<{ message: string; data: Pengaduan }>('/api/aduan', {
+    mutationFn: async (payload: {
+      id_kategori: number;
+      lokasi: string;
+      isi_pengaduan: string;
+      fotos: SelectedFoto[];
+    }) => {
+      if (import.meta.env.VITE_USE_MOCKS === 'true') {
+        return apiFetch<{ message: string; data: Pengaduan }>('/api/aduan', {
+          method: 'POST',
+          body: JSON.stringify({
+            id_kategori: payload.id_kategori,
+            lokasi: payload.lokasi,
+            isi_pengaduan: payload.isi_pengaduan,
+            fotos: payload.fotos.map((f) => f.previewUrl),
+          }),
+        });
+      }
+
+      const formData = new FormData();
+      formData.append('id_kategori', String(payload.id_kategori));
+      formData.append('lokasi', payload.lokasi);
+      formData.append('isi_pengaduan', payload.isi_pengaduan);
+      payload.fotos.forEach((f) => {
+        formData.append('fotos[]', f.file);
+      });
+
+      return apiFetch<{ message: string; data: Pengaduan }>('/api/aduan', {
         method: 'POST',
-        body: JSON.stringify(payload),
-      }),
+        body: formData,
+      });
+    },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['aduan-saya'] });
+      queryClient.invalidateQueries({ queryKey: ['statistik-publik'] });
       setSuksesAduan(res.data);
     },
     onError: (err) => {
@@ -48,29 +79,31 @@ export const FormAduan: React.FC = () => {
     },
   });
 
-  // Handle upload foto (simulasi FileReader data URL dengan kompresi sederhana)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
 
     if (fotos.length + files.length > 3) {
-      alert('Maksimal lampiran adalah 3 foto.');
+      setErrorMsg('Maksimal lampiran adalah 3 foto.');
+      e.target.value = '';
       return;
     }
 
     files.forEach((file) => {
       if (file.size > 2 * 1024 * 1024) {
-        alert(`File ${file.name} melebihi batas 2 MB.`);
+        setErrorMsg(`File ${file.name} melebihi batas 2 MB.`);
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          setFotos((prev) => [...prev, reader.result as string]);
+          setFotos((prev) => [...prev, { file, previewUrl: reader.result as string }]);
         }
       };
       reader.readAsDataURL(file);
     });
+
+    e.target.value = '';
   };
 
   const removeFoto = (index: number) => {
@@ -102,7 +135,6 @@ export const FormAduan: React.FC = () => {
     });
   };
 
-  // Tampilan Konfirmasi Sukses (sesuai diagram alir: gnerate nomor aduan unik -> Tampilkan konfirmasi)
   if (suksesAduan) {
     return (
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 text-center space-y-4 shadow-sm">
@@ -146,7 +178,6 @@ export const FormAduan: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Top Bar Form sesuai wireframe 2: Form Aduan */}
       <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
         <Link to="/warga/aduan" className="p-1 -ml-1 text-slate-600 hover:text-slate-900">
           <ArrowLeft className="w-5 h-5" />
@@ -161,9 +192,7 @@ export const FormAduan: React.FC = () => {
         </div>
       )}
 
-      {/* Form Card sesuai wireframe 2 */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-        {/* 1. Kategori */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
             Kategori
@@ -174,7 +203,7 @@ export const FormAduan: React.FC = () => {
             required
             className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50/50"
           >
-            <option value="">Pilih Kategori ▾</option>
+            <option value="">Pilih Kategori</option>
             {catData?.data?.map((cat) => (
               <option key={cat.id_kategori} value={cat.id_kategori}>
                 {cat.nama_kategori}
@@ -183,7 +212,6 @@ export const FormAduan: React.FC = () => {
           </select>
         </div>
 
-        {/* 2. Lokasi RT */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
             Lokasi RT
@@ -198,7 +226,6 @@ export const FormAduan: React.FC = () => {
           />
         </div>
 
-        {/* 3. Uraian */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
             Uraian
@@ -213,21 +240,20 @@ export const FormAduan: React.FC = () => {
           />
         </div>
 
-        {/* 4. Foto (Opsional) */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
             Foto (Opsional, Maks 3 Foto)
           </label>
 
-          {/* Preview thumbnails */}
           {fotos.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mb-2">
-              {fotos.map((src, idx) => (
+              {fotos.map((item, idx) => (
                 <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200">
-                  <img src={src} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                  <img src={item.previewUrl} alt={`Lampiran ${idx + 1}`} className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removeFoto(idx)}
+                    aria-label={`Hapus foto ${idx + 1}`}
                     className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full hover:bg-rose-600"
                   >
                     <X className="w-3 h-3" />
@@ -244,7 +270,7 @@ export const FormAduan: React.FC = () => {
               <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, atau WebP (Maks 2 MB)</span>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 multiple
                 onChange={handleFileChange}
                 className="hidden"
@@ -253,7 +279,6 @@ export const FormAduan: React.FC = () => {
           )}
         </div>
 
-        {/* Tombol Kirim */}
         <button
           type="submit"
           disabled={mutation.isPending}

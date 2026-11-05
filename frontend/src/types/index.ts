@@ -80,3 +80,14 @@ export interface RingkasanAduan {
   selesai: number;
   ditolak: number;
 }
+
+export interface AduanSelesaiPublik {
+  id_pengaduan: number;
+  nomor_pengaduan: string;
+  judul: string;
+  nama_kategori: string;
+  rt: string | null;
+  diperbarui_pada: string;
+  foto_url: string | null;
+  tanggapan_terakhir: string | null;
+}

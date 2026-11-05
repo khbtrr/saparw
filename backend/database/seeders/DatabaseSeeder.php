@@ -8,12 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // 1. Seed Pengguna
         DB::table('pengguna')->insert([
             [
                 'id_pengguna' => 1,
@@ -77,7 +73,6 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        // 2. Seed Kategori Fasilitas
         DB::table('kategori_fasilitas')->insert([
             ['id_kategori' => 1, 'nama_kategori' => 'Lampu Jalan', 'deskripsi' => 'Penerangan jalan lingkungan, lampu mati/redup/rusak', 'aktif' => true],
             ['id_kategori' => 2, 'nama_kategori' => 'Saluran Got', 'deskripsi' => 'Drainase, saluran air tersumbat sampah, luapan air', 'aktif' => true],
@@ -86,14 +81,13 @@ class DatabaseSeeder extends Seeder
             ['id_kategori' => 5, 'nama_kategori' => 'Sampah', 'deskripsi' => 'Sampah menumpuk, bak sampah rusak, TPS liar', 'aktif' => true],
         ]);
 
-        // 3. Seed Pengaduan Contoh
         DB::table('pengaduan')->insert([
             [
                 'id_pengaduan' => 1,
                 'nomor_pengaduan' => 'ADU-2026-001',
                 'id_pelapor' => 2,
                 'id_kategori' => 1,
-                'judul' => 'Lampu Jalan – Lampu di gang 2 RT 02 mati total sudah 3 hari',
+                'judul' => 'Lampu Jalan: Lampu di gang 2 RT 02 mati total sudah 3 hari',
                 'isi_pengaduan' => 'Lampu penerangan jalan di tiang depan rumah No 12 gang 2 mati sejak hari Selasa, kondisi gang sangat gelap di malam hari membahayakan warga.',
                 'lokasi' => 'RT 02, dekat tiang listrik depan rumah No 12',
                 'status_terkini' => 'Diajukan',
@@ -107,7 +101,7 @@ class DatabaseSeeder extends Seeder
                 'nomor_pengaduan' => 'ADU-2026-002',
                 'id_pelapor' => 5,
                 'id_kategori' => 2,
-                'judul' => 'Saluran Got – Saluran got tersumbat sampah plastik dan meluap',
+                'judul' => 'Saluran Got: Saluran got tersumbat sampah plastik dan meluap',
                 'isi_pengaduan' => 'Got utama RT 01 mampet karena tumpukan sampah kiriman dan endapan lumpur, air meluap ke badan jalan setiap hujan deras.',
                 'lokasi' => 'RT 01, jalan utama samping pos ronda',
                 'status_terkini' => 'Diverifikasi',
@@ -121,7 +115,7 @@ class DatabaseSeeder extends Seeder
                 'nomor_pengaduan' => 'ADU-2026-003',
                 'id_pelapor' => 2,
                 'id_kategori' => 3,
-                'judul' => 'Jalan Rusak – Jalan berlubang cukup dalam di persimpangan gang',
+                'judul' => 'Jalan Rusak: Jalan berlubang cukup dalam di persimpangan gang',
                 'isi_pengaduan' => 'Ada lubang aspal berdiameter 60cm dengan kedalaman 10cm. Sudah ada warga yang terpeleset saat naik motor malam hari.',
                 'lokasi' => 'RT 02, persimpangan gang Cendana IV',
                 'status_terkini' => 'Diproses',
@@ -135,7 +129,7 @@ class DatabaseSeeder extends Seeder
                 'nomor_pengaduan' => 'ADU-2026-004',
                 'id_pelapor' => 5,
                 'id_kategori' => 4,
-                'judul' => 'Pos Ronda – Atap pos ronda bocor dan papan tempat duduk lapuk',
+                'judul' => 'Pos Ronda: Atap pos ronda bocor dan papan tempat duduk lapuk',
                 'isi_pengaduan' => 'Atap asbes pos kamling pecah terkena ranting pohon, air masuk saat hujan sehingga warga tidak bisa jaga malam dengan nyaman.',
                 'lokasi' => 'RT 04, Jl. Manggis No. 01 samping gerbang',
                 'status_terkini' => 'Selesai',
@@ -149,7 +143,7 @@ class DatabaseSeeder extends Seeder
                 'nomor_pengaduan' => 'ADU-2026-005',
                 'id_pelapor' => 2,
                 'id_kategori' => 5,
-                'judul' => 'Sampah – Sampah liar menumpuk di tanah kosong perbatasan RT',
+                'judul' => 'Sampah: Sampah liar menumpuk di tanah kosong perbatasan RT',
                 'isi_pengaduan' => 'Banyak kantong sampah plastik dibuang sembarangan oleh orang lewat di pinggir jalan tanah kosong, bau menyengat.',
                 'lokasi' => 'RT 05, tanah kosong Jl. Dahlia',
                 'status_terkini' => 'Selesai',
@@ -163,7 +157,7 @@ class DatabaseSeeder extends Seeder
                 'nomor_pengaduan' => 'ADU-2026-006',
                 'id_pelapor' => 2,
                 'id_kategori' => 1,
-                'judul' => 'Lampu Jalan – Pasang lampu hias pribadi di tiang jalan',
+                'judul' => 'Lampu Jalan: Pasang lampu hias pribadi di tiang jalan',
                 'isi_pengaduan' => 'Mohon RW memasangkan lampu sorot warna-warni pribadi saya di tiang jalan umum.',
                 'lokasi' => 'RT 02, tiang listrik pribadi',
                 'status_terkini' => 'Ditolak',
@@ -174,7 +168,37 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        // 4. Seed Riwayat Status & Tanggapan
+        DB::table('lampiran_foto')->insert([
+            [
+                'id_lampiran' => 1,
+                'id_pengaduan' => 1,
+                'path_foto' => 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80',
+                'keterangan' => 'Kondisi lampu jalan mati malam hari',
+                'diunggah_pada' => '2026-10-24 19:30:00',
+            ],
+            [
+                'id_lampiran' => 2,
+                'id_pengaduan' => 2,
+                'path_foto' => 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=600&q=80',
+                'keterangan' => 'Sampah menyumbat saluran',
+                'diunggah_pada' => '2026-10-23 08:20:00',
+            ],
+            [
+                'id_lampiran' => 3,
+                'id_pengaduan' => 3,
+                'path_foto' => 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80',
+                'keterangan' => 'Lubang jalan persimpangan',
+                'diunggah_pada' => '2026-10-20 14:10:00',
+            ],
+            [
+                'id_lampiran' => 4,
+                'id_pengaduan' => 4,
+                'path_foto' => 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=600&q=80',
+                'keterangan' => 'Kondisi atap pos ronda saat dilaporkan',
+                'diunggah_pada' => '2026-10-15 11:00:00',
+            ],
+        ]);
+
         DB::table('riwayat_status')->insert([
             ['id_pengaduan' => 1, 'id_pencatat' => 2, 'status_sebelumnya' => null, 'status_baru' => 'Diajukan', 'catatan' => 'Laporan baru dikirim warga', 'dicatat_pada' => '2026-10-24 19:30:00'],
             ['id_pengaduan' => 2, 'id_pencatat' => 5, 'status_sebelumnya' => null, 'status_baru' => 'Diajukan', 'catatan' => 'Laporan dibuat', 'dicatat_pada' => '2026-10-23 08:20:00'],
@@ -196,6 +220,7 @@ class DatabaseSeeder extends Seeder
             ['id_pengaduan' => 2, 'id_pengurus' => 1, 'isi_tanggapan' => 'Terima kasih laporannya Bu Rina. Pengurus sudah memeriksa dan akan mengkoordinasikan kerja bakti RT 01 hari Minggu besok.', 'ditanggapi_pada' => '2026-10-23 10:20:00'],
             ['id_pengaduan' => 3, 'id_pengurus' => 1, 'isi_tanggapan' => 'Laporan sedang ditangani. Bagian jalan sementara diberi penanda drum dan akan ditambal pasir semen swadaya akhir pekan.', 'ditanggapi_pada' => '2026-10-22 09:05:00'],
             ['id_pengaduan' => 4, 'id_pengurus' => 1, 'isi_tanggapan' => 'Perbaikan pos ronda sudah rampung 100%. Terima kasih atas partisipasi aktif warga.', 'ditanggapi_pada' => '2026-10-18 16:05:00'],
+            ['id_pengaduan' => 5, 'id_pengurus' => 1, 'isi_tanggapan' => 'Tumpukan sampah telah diangkut bersama armada kebersihan desa dan lokasi sudah dipasang papan larangan buang sampah.', 'ditanggapi_pada' => '2026-10-12 11:10:00'],
             ['id_pengaduan' => 6, 'id_pengurus' => 1, 'isi_tanggapan' => 'Mohon maaf permohonan ditolak karena fasilitas lingkungan hanya untuk penerangan umum standar dan utilitas resmi RW.', 'ditanggapi_pada' => '2026-10-05 15:35:00'],
         ]);
     }

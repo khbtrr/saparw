@@ -24,6 +24,15 @@ class Tanggapan extends Model
         'ditanggapi_pada' => 'datetime',
     ];
 
+    protected $appends = [
+        'nama_pengurus',
+    ];
+
+    public function getNamaPengurusAttribute(): ?string
+    {
+        return $this->relationLoaded('pengurus') ? $this->pengurus?->nama : null;
+    }
+
     public function pengurus()
     {
         return $this->belongsTo(Pengguna::class, 'id_pengurus', 'id_pengguna');

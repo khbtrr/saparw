@@ -8,11 +8,13 @@ import type { Pengguna } from '../types';
 export const LoginPengurus: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const showDemoHint = import.meta.env.VITE_SHOW_DEMO_HINT === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export const LoginPengurus: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await apiFetch<{ data: { user: Pengguna } }>('/api/auth/login', {
+      const res = await apiFetch<{ data: { user: Pengguna; token?: string } }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({
           username,
@@ -44,9 +46,7 @@ export const LoginPengurus: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center px-4 py-8">
-      {/* Desktop Card style matching wireframe 1: Login Pengurus RW */}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-        {/* Browser Mockup Top Bar */}
         <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
           <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
@@ -102,6 +102,7 @@ export const LoginPengurus: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                   className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -127,15 +128,17 @@ export const LoginPengurus: React.FC = () => {
 
           <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <Link to="/masuk" className="hover:text-emerald-700">
-              ← Masuk sebagai Warga
+              Kembali ke Login Warga
             </Link>
             <span className="text-[11px] text-slate-400">Versi 1.0</span>
           </div>
 
-          <div className="mt-4 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600">
-            <p className="font-bold text-slate-700">Akun Demo Pengurus:</p>
-            <p>Username: <code className="bg-slate-200 px-1 rounded">admin</code> | Pass: <code className="bg-slate-200 px-1 rounded">admin123</code></p>
-          </div>
+          {showDemoHint && (
+            <div className="mt-4 p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600">
+              <p className="font-bold text-slate-700">Akun Demo Pengurus:</p>
+              <p>Username: <code className="bg-slate-200 px-1 rounded">admin</code> | Pass: <code className="bg-slate-200 px-1 rounded">admin123</code></p>
+            </div>
+          )}
         </div>
       </div>
     </div>

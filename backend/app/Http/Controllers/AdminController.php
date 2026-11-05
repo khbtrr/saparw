@@ -9,10 +9,10 @@ use App\Models\RiwayatStatus;
 use App\Models\Tanggapan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    // 1. Daftar Aduan Admin + 6 Kartu Ringkasan
     public function daftarAduan(Request $request)
     {
         $all = Pengaduan::all();
@@ -48,7 +48,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // 2. Update Status Verifikasi & Tindak Lanjut Aduan
     public function updateStatus(Request $request, $id)
     {
         $admin = $request->user();
@@ -105,12 +104,11 @@ class AdminController extends Controller
 
             return response()->json([
                 'message' => 'Status berhasil diperbarui.',
-                'data' => $aduan->load(['riwayat_status.pencatat', 'tanggapan']),
+                'data' => $aduan->load(['riwayat_status.pencatat', 'tanggapan.pengurus']),
             ]);
         });
     }
 
-    // 3. Kirim Tanggapan Resmi Pengurus RW
     public function kirimTanggapan(Request $request, $id)
     {
         $admin = $request->user();
@@ -140,7 +138,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // 4. Verifikasi & Kelola Akun Warga
     public function daftarPengguna(Request $request)
     {
         $tab = $request->tab ?? 'belum_aktif';
@@ -187,13 +184,17 @@ class AdminController extends Controller
         $user->aktif = $request->aktif;
         $user->save();
 
+        // Revoke active Sanctum tokens immediately when an account is deactivated.
+        if (! $user->aktif) {
+            $user->tokens()->delete();
+        }
+
         return response()->json([
             'message' => 'Status akun warga berhasil diperbarui.',
             'data' => $user,
         ]);
     }
 
-    // 5. Kelola Kategori Fasilitas
     public function indexKategori()
     {
         return response()->json([
@@ -206,6 +207,8 @@ class AdminController extends Controller
         $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_fasilitas,nama_kategori',
             'deskripsi' => 'nullable|string',
+        ], [
+            'nama_kategori.unique' => 'Nama kategori fasilitas sudah terdaftar.',
         ]);
 
         $cat = KategoriFasilitas::create([
@@ -218,6 +221,36 @@ class AdminController extends Controller
             'message' => 'Kategori berhasil ditambahkan.',
             'data' => $cat,
         ], 201);
+    }
+
+    public function updateKategori(Request $request, $id)
+    {
+        $cat = KategoriFasilitas::find($id);
+
+        if (! $cat) {
+            return response()->json(['message' => 'Kategori tidak ditemukan.'], 404);
+        }
+
+        $request->validate([
+            'nama_kategori' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('kategori_fasilitas', 'nama_kategori')->ignore($cat->id_kategori, 'id_kategori'),
+            ],
+            'deskripsi' => 'nullable|string',
+        ], [
+            'nama_kategori.unique' => 'Nama kategori fasilitas sudah terdaftar.',
+        ]);
+
+        $cat->nama_kategori = trim($request->nama_kategori);
+        $cat->deskripsi = trim($request->deskripsi ?? '');
+        $cat->save();
+
+        return response()->json([
+            'message' => 'Kategori berhasil diperbarui.',
+            'data' => $cat,
+        ]);
     }
 
     public function toggleAktifKategori(Request $request, $id)
@@ -239,7 +272,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // 6. Rekapitulasi & Laporan Matriks Kategori x Status
     public function rekap(Request $request)
     {
         $categories = KategoriFasilitas::all();

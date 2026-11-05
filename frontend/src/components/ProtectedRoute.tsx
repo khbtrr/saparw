@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { PeranPengguna } from '../types';
 
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -22,8 +23,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) 
   }
 
   if (!user) {
-    // Redirect sesuai target role
-    return <Navigate to={requiredRole === 'admin' ? '/admin/masuk' : '/masuk'} replace />;
+    return (
+      <Navigate
+        to={requiredRole === 'admin' ? '/admin/masuk' : '/masuk'}
+        state={{ from: location.pathname }}
+        replace
+      />
+    );
   }
 
   if (requiredRole && user.peran !== requiredRole) {

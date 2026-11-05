@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Pengguna } from '../types';
-import { apiFetch } from '../lib/api';
+import { apiFetch, getAuthToken, setAuthToken } from '../lib/api';
 
 interface AuthContextType {
   user: Pengguna | null;
@@ -17,10 +17,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = async () => {
+    const token = getAuthToken();
+    const useMocks = import.meta.env.VITE_USE_MOCKS === 'true';
+
+    if (!token && !useMocks) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await apiFetch<{ data: Pengguna }>('/api/auth/me');
       setUser(res.data);
     } catch {
+      setAuthToken(null);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -31,7 +41,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshUser();
   }, []);
 
-  const login = (payload: { user: Pengguna }) => {
+  const login = (payload: { user: Pengguna; token?: string }) => {
+    if (payload.token) {
+      setAuthToken(payload.token);
+    }
     setUser(payload.user);
   };
 
@@ -39,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' });
     } finally {
+      setAuthToken(null);
       setUser(null);
     }
   };

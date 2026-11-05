@@ -26,6 +26,15 @@ class RiwayatStatus extends Model
         'dicatat_pada' => 'datetime',
     ];
 
+    protected $appends = [
+        'nama_pencatat',
+    ];
+
+    public function getNamaPencatatAttribute(): ?string
+    {
+        return $this->relationLoaded('pencatat') ? $this->pencatat?->nama : null;
+    }
+
     public function pencatat()
     {
         return $this->belongsTo(Pengguna::class, 'id_pencatat', 'id_pengguna');

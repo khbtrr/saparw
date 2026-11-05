@@ -158,6 +158,33 @@ export const handlers = [
     return HttpResponse.json({ data });
   }),
 
+  http.get('/api/publik/aduan-selesai', async () => {
+    // Strip reporter identity and house number for public privacy.
+    const kategoriMap = new Map(db.getKategori().map((k) => [k.id_kategori, k.nama_kategori]));
+    const penggunaMap = new Map(db.getPengguna().map((u) => [u.id_pengguna, u.rt ?? null]));
+    const selesai = db
+      .getPengaduan()
+      .filter((a) => a.status_terkini === 'Selesai')
+      .sort((a, b) => new Date(b.diperbarui_pada).getTime() - new Date(a.diperbarui_pada).getTime())
+      .slice(0, 3)
+      .map((a) => {
+        const foto = a.lampiran_foto && a.lampiran_foto.length > 0 ? a.lampiran_foto[0].path_foto : null;
+        const tanggapanList = a.tanggapan || [];
+        const tanggapanTerakhir = tanggapanList.length > 0 ? tanggapanList[tanggapanList.length - 1].isi_tanggapan : null;
+        return {
+          id_pengaduan: a.id_pengaduan,
+          nomor_pengaduan: a.nomor_pengaduan,
+          judul: a.judul,
+          nama_kategori: kategoriMap.get(a.id_kategori) || 'Umum',
+          rt: penggunaMap.get(a.id_pelapor) || null,
+          diperbarui_pada: a.diperbarui_pada,
+          foto_url: foto,
+          tanggapan_terakhir: tanggapanTerakhir,
+        };
+      });
+    return HttpResponse.json({ data: selesai });
+  }),
+
   http.get('/api/kategori', async () => {
     const categories = db.getKategori().filter((c) => c.aktif);
     return HttpResponse.json({ data: categories });
@@ -579,6 +606,23 @@ export const handlers = [
     item.aktif = body.aktif;
     db.saveKategori(categories);
     return HttpResponse.json({ message: 'Status kategori diperbarui.', data: item });
+  }),
+
+  http.put('/api/admin/kategori/:id', async ({ params, request }) => {
+    const id = Number(params.id);
+    const body = (await request.json()) as { nama_kategori?: string; deskripsi?: string };
+    if (!body.nama_kategori?.trim()) {
+      return HttpResponse.json({ message: 'Nama kategori wajib diisi.' }, { status: 422 });
+    }
+
+    const categories = db.getKategori();
+    const item = categories.find((c) => c.id_kategori === id);
+    if (!item) return HttpResponse.json({ message: 'Kategori tidak ditemukan.' }, { status: 404 });
+
+    item.nama_kategori = body.nama_kategori.trim();
+    item.deskripsi = body.deskripsi?.trim() || null;
+    db.saveKategori(categories);
+    return HttpResponse.json({ message: 'Kategori berhasil diperbarui.', data: item });
   }),
 
   // --- ADMIN: REKAP ---

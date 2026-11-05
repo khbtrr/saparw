@@ -7,15 +7,17 @@ use App\Models\LampiranFoto;
 use App\Models\Pengaduan;
 use App\Models\RiwayatStatus;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AduanController extends Controller
 {
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Pengaduan::with(['kategori', 'lampiran_foto', 'tanggapan', 'riwayat_status'])
+        $query = Pengaduan::with(['kategori', 'lampiran_foto', 'tanggapan.pengurus', 'riwayat_status.pencatat'])
             ->where('id_pelapor', $user->id_pengguna);
 
         if ($request->has('status') && $request->status !== 'Semua') {
@@ -50,10 +52,9 @@ class AduanController extends Controller
         }
 
         if ($user->peran === 'warga' && $aduan->id_pelapor !== $user->id_pengguna) {
-            return response()->json(['message' => 'Unauthorized access.'], 403);
+            return response()->json(['message' => 'Anda tidak memiliki akses ke aduan ini.'], 403);
         }
 
-        // Tandai sudah dilihat jika pelapor yang mengakses
         if ($user->peran === 'warga') {
             $aduan->dilihat_pelapor_pada = now();
             $aduan->save();
@@ -68,25 +69,51 @@ class AduanController extends Controller
     {
         $user = $request->user();
 
-        $request->validate([
+        $rules = [
             'id_kategori' => 'required|exists:kategori_fasilitas,id_kategori',
             'lokasi' => 'required|string|max:500',
             'isi_pengaduan' => 'required|string',
             'fotos' => 'nullable|array|max:3',
-            'fotos.*' => 'nullable|string', // Support data URL / string path dari frontend
+        ];
+
+        if ($request->hasFile('fotos')) {
+            $rules['fotos.*'] = 'file|image|mimes:jpg,jpeg,png,webp|max:2048';
+        } else {
+            $rules['fotos.*'] = 'nullable|string';
+        }
+
+        $request->validate($rules, [
+            'fotos.max' => 'Maksimal lampiran adalah 3 foto.',
+            'fotos.*.image' => 'Lampiran harus berupa gambar (JPG, PNG, atau WebP).',
+            'fotos.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
         ]);
 
         return DB::transaction(function () use ($request, $user) {
             $year = date('Y');
-            $totalCount = Pengaduan::count();
-            $seq = str_pad($totalCount + 1, 3, '0', STR_PAD_LEFT);
-            $nomor = "ADU-{$year}-{$seq}";
+            $prefix = "ADU-{$year}-";
+
+            // Derive next sequence from the highest existing number so deleted rows never cause collisions.
+            $existingNumbers = Pengaduan::where('nomor_pengaduan', 'like', "{$prefix}%")
+                ->lockForUpdate()
+                ->pluck('nomor_pengaduan');
+
+            $maxSeq = 0;
+            foreach ($existingNumbers as $num) {
+                $parts = explode('-', $num);
+                $seqNum = isset($parts[2]) ? (int) $parts[2] : 0;
+                if ($seqNum > $maxSeq) {
+                    $maxSeq = $seqNum;
+                }
+            }
+
+            $seq = str_pad($maxSeq + 1, 3, '0', STR_PAD_LEFT);
+            $nomor = "{$prefix}{$seq}";
 
             $kategori = KategoriFasilitas::find($request->id_kategori);
             $namaKat = $kategori ? $kategori->nama_kategori : 'Fasilitas';
 
             $cleanUraian = preg_replace('/\s+/', ' ', trim($request->isi_pengaduan));
-            $judul = "{$namaKat} – " . mb_substr($cleanUraian, 0, 40) . (mb_strlen($cleanUraian) > 40 ? '…' : '');
+            $judul = "{$namaKat}: " . mb_substr($cleanUraian, 0, 40) . (mb_strlen($cleanUraian) > 40 ? '...' : '');
 
             $aduan = Pengaduan::create([
                 'nomor_pengaduan' => $nomor,
@@ -101,21 +128,17 @@ class AduanController extends Controller
                 'dilihat_pelapor_pada' => now(),
             ]);
 
-            // Simpan foto lampiran jika ada
-            if ($request->has('fotos') && is_array($request->fotos)) {
-                foreach ($request->fotos as $idx => $fotoData) {
-                    if (! empty($fotoData)) {
-                        LampiranFoto::create([
-                            'id_pengaduan' => $aduan->id_pengaduan,
-                            'path_foto' => $fotoData,
-                            'keterangan' => 'Foto ' . ($idx + 1),
-                            'diunggah_pada' => now(),
-                        ]);
-                    }
-                }
+            $savedPaths = $this->storeUploadedFotos($request, $aduan->id_pengaduan);
+
+            foreach ($savedPaths as $idx => $pathFoto) {
+                LampiranFoto::create([
+                    'id_pengaduan' => $aduan->id_pengaduan,
+                    'path_foto' => $pathFoto,
+                    'keterangan' => 'Foto ' . ($idx + 1),
+                    'diunggah_pada' => now(),
+                ]);
             }
 
-            // Catat riwayat status awal
             RiwayatStatus::create([
                 'id_pengaduan' => $aduan->id_pengaduan,
                 'id_pencatat' => $user->id_pengguna,
@@ -127,7 +150,7 @@ class AduanController extends Controller
 
             return response()->json([
                 'message' => 'Pengaduan berhasil diajukan.',
-                'data' => $aduan->load(['kategori', 'lampiran_foto', 'riwayat_status']),
+                'data' => $aduan->load(['kategori', 'lampiran_foto', 'riwayat_status.pencatat']),
             ], 201);
         });
     }
@@ -135,14 +158,14 @@ class AduanController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = $request->user();
-        $aduan = Pengaduan::find($id);
+        $aduan = Pengaduan::with('lampiran_foto')->find($id);
 
         if (! $aduan) {
             return response()->json(['message' => 'Aduan tidak ditemukan.'], 404);
         }
 
         if ($aduan->id_pelapor !== $user->id_pengguna) {
-            return response()->json(['message' => 'Unauthorized access.'], 403);
+            return response()->json(['message' => 'Anda tidak memiliki akses untuk membatalkan aduan ini.'], 403);
         }
 
         if ($aduan->status_terkini !== 'Diajukan') {
@@ -151,10 +174,57 @@ class AduanController extends Controller
             ], 400);
         }
 
+        foreach ($aduan->lampiran_foto as $foto) {
+            if ($foto->path_foto && str_starts_with($foto->path_foto, '/storage/')) {
+                $relativePath = substr($foto->path_foto, strlen('/storage/'));
+                Storage::disk('public')->delete($relativePath);
+            }
+        }
+
         $aduan->delete();
 
         return response()->json([
             'message' => 'Pengaduan berhasil dibatalkan.',
         ]);
+    }
+
+    private function storeUploadedFotos(Request $request, int $idPengaduan): array
+    {
+        $paths = [];
+
+        if ($request->hasFile('fotos')) {
+            foreach ($request->file('fotos') as $idx => $file) {
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    $ext = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                    $filename = "aduan_{$idPengaduan}_" . ($idx + 1) . '_' . Str::random(8) . ".{$ext}";
+                    $stored = $file->storeAs('aduan', $filename, 'public');
+                    $paths[] = '/storage/' . $stored;
+                }
+            }
+
+            return $paths;
+        }
+
+        if (is_array($request->fotos)) {
+            foreach ($request->fotos as $idx => $fotoData) {
+                if (empty($fotoData) || ! is_string($fotoData)) {
+                    continue;
+                }
+
+                if (preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,(.+)$/i', $fotoData, $matches)) {
+                    $ext = strtolower($matches[1]) === 'jpeg' ? 'jpg' : strtolower($matches[1]);
+                    $binary = base64_decode($matches[2], true);
+                    if ($binary !== false) {
+                        $filename = "aduan/aduan_{$idPengaduan}_" . ($idx + 1) . '_' . Str::random(8) . ".{$ext}";
+                        Storage::disk('public')->put($filename, $binary);
+                        $paths[] = '/storage/' . $filename;
+                    }
+                } elseif (mb_strlen($fotoData) <= 255) {
+                    $paths[] = $fotoData;
+                }
+            }
+        }
+
+        return $paths;
     }
 }
