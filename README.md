@@ -46,7 +46,7 @@ Data pengguna berikut tersedia langsung di basis data lokal:
 
 | Peran | Username | Password | Deskripsi |
 |---|---|---|---|
-| Ketua RW 05 | `admin` | `admin123` | Administrator pengurus RW. Mengelola laporan aduan, verifikasi status, tanggapan warga, aktivasi akun, kelola kategori fasilitas, dan rekapitulasi cetak. |
+| Ketua RW 05 | `admin` | `SapaRW05#Karangraharja2026` | Administrator pengurus RW. Mengelola laporan aduan, verifikasi status, tanggapan warga, aktivasi akun, kelola kategori fasilitas, dan rekapitulasi cetak. |
 | Warga Aktif | `warga01` | `warga123` | Siti Aminah (Warga RT 02). Mengajukan aduan baru disertai foto dan memantau status laporan. |
 | Warga Baru (Pending) | `warga02` | `warga123` | Ahmad Fauzi (RT 03). Akun berstatus belum aktif (`aktif = false`). Akses masuk dibatasi sampai pengurus mengaktifkan akun di panel admin. |
 
